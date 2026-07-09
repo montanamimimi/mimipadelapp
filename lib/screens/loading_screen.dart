@@ -1,12 +1,12 @@
+import 'package:mimipadel/controllers/home_controller.dart';
 import 'package:mimipadel/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:mimipadel/repositories/tournament_repository.dart';
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key, required this.repository});
+  const LoadingScreen({super.key, required this.controller});
 
-  final TournamentRepository repository;
+  final HomeController controller;
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -14,34 +14,24 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
-  Future<void> load() async {  
-
-    try {
-      final data = await widget.repository.getTournaments();
-      debugPrint('Loaded: ${data.length}');
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(
-            tournaments: data,
-            repository: widget.repository,
-          ),
+  Future<void> _bootstrap() async {  
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HomeScreen(
+          controller: widget.controller,
         ),
-      );
-    }
-
-    catch (e, st) {
-      debugPrint('LOAD ERROR: $e');
-      debugPrint('$st');
-    }
-
+      ),
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bootstrap();
+    });
   }
 
   @override
@@ -49,13 +39,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(      
       backgroundColor: Colors.blueAccent,
       body: Center(
-        child:   Container(
+        child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage('assets/images/padel.jpg'),
-                fit: BoxFit.cover,
+                image: AssetImage('assets/images/loading.png'),
+                alignment: Alignment.topCenter,
               ),
-          ),              
+          ),
           child: SpinKitFadingCircle(
             color: Colors.white,
             size: 80.0,

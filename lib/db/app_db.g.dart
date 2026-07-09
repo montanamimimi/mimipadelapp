@@ -90,6 +90,18 @@ class $TournamentTableTable extends TournamentTable
       'CHECK ("finished" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _mixerMeta = const VerificationMeta('mixer');
+  @override
+  late final GeneratedColumn<bool> mixer = GeneratedColumn<bool>(
+    'mixer',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("mixer" IN (0, 1))',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -99,6 +111,7 @@ class $TournamentTableTable extends TournamentTable
     date,
     started,
     finished,
+    mixer,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -163,6 +176,14 @@ class $TournamentTableTable extends TournamentTable
     } else if (isInserting) {
       context.missing(_finishedMeta);
     }
+    if (data.containsKey('mixer')) {
+      context.handle(
+        _mixerMeta,
+        mixer.isAcceptableOrUnknown(data['mixer']!, _mixerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mixerMeta);
+    }
     return context;
   }
 
@@ -200,6 +221,10 @@ class $TournamentTableTable extends TournamentTable
         DriftSqlType.bool,
         data['${effectivePrefix}finished'],
       )!,
+      mixer: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}mixer'],
+      )!,
     );
   }
 
@@ -218,6 +243,7 @@ class TournamentTableData extends DataClass
   final DateTime date;
   final bool started;
   final bool finished;
+  final bool mixer;
   const TournamentTableData({
     required this.id,
     required this.name,
@@ -226,6 +252,7 @@ class TournamentTableData extends DataClass
     required this.date,
     required this.started,
     required this.finished,
+    required this.mixer,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -237,6 +264,7 @@ class TournamentTableData extends DataClass
     map['date'] = Variable<DateTime>(date);
     map['started'] = Variable<bool>(started);
     map['finished'] = Variable<bool>(finished);
+    map['mixer'] = Variable<bool>(mixer);
     return map;
   }
 
@@ -249,6 +277,7 @@ class TournamentTableData extends DataClass
       date: Value(date),
       started: Value(started),
       finished: Value(finished),
+      mixer: Value(mixer),
     );
   }
 
@@ -265,6 +294,7 @@ class TournamentTableData extends DataClass
       date: serializer.fromJson<DateTime>(json['date']),
       started: serializer.fromJson<bool>(json['started']),
       finished: serializer.fromJson<bool>(json['finished']),
+      mixer: serializer.fromJson<bool>(json['mixer']),
     );
   }
   @override
@@ -278,6 +308,7 @@ class TournamentTableData extends DataClass
       'date': serializer.toJson<DateTime>(date),
       'started': serializer.toJson<bool>(started),
       'finished': serializer.toJson<bool>(finished),
+      'mixer': serializer.toJson<bool>(mixer),
     };
   }
 
@@ -289,6 +320,7 @@ class TournamentTableData extends DataClass
     DateTime? date,
     bool? started,
     bool? finished,
+    bool? mixer,
   }) => TournamentTableData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -297,6 +329,7 @@ class TournamentTableData extends DataClass
     date: date ?? this.date,
     started: started ?? this.started,
     finished: finished ?? this.finished,
+    mixer: mixer ?? this.mixer,
   );
   TournamentTableData copyWithCompanion(TournamentTableCompanion data) {
     return TournamentTableData(
@@ -307,6 +340,7 @@ class TournamentTableData extends DataClass
       date: data.date.present ? data.date.value : this.date,
       started: data.started.present ? data.started.value : this.started,
       finished: data.finished.present ? data.finished.value : this.finished,
+      mixer: data.mixer.present ? data.mixer.value : this.mixer,
     );
   }
 
@@ -319,14 +353,15 @@ class TournamentTableData extends DataClass
           ..write('points: $points, ')
           ..write('date: $date, ')
           ..write('started: $started, ')
-          ..write('finished: $finished')
+          ..write('finished: $finished, ')
+          ..write('mixer: $mixer')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, name, courts, points, date, started, finished);
+      Object.hash(id, name, courts, points, date, started, finished, mixer);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -337,7 +372,8 @@ class TournamentTableData extends DataClass
           other.points == this.points &&
           other.date == this.date &&
           other.started == this.started &&
-          other.finished == this.finished);
+          other.finished == this.finished &&
+          other.mixer == this.mixer);
 }
 
 class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
@@ -348,6 +384,7 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
   final Value<DateTime> date;
   final Value<bool> started;
   final Value<bool> finished;
+  final Value<bool> mixer;
   const TournamentTableCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -356,6 +393,7 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
     this.date = const Value.absent(),
     this.started = const Value.absent(),
     this.finished = const Value.absent(),
+    this.mixer = const Value.absent(),
   });
   TournamentTableCompanion.insert({
     this.id = const Value.absent(),
@@ -365,12 +403,14 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
     required DateTime date,
     required bool started,
     required bool finished,
+    required bool mixer,
   }) : name = Value(name),
        courts = Value(courts),
        points = Value(points),
        date = Value(date),
        started = Value(started),
-       finished = Value(finished);
+       finished = Value(finished),
+       mixer = Value(mixer);
   static Insertable<TournamentTableData> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -379,6 +419,7 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
     Expression<DateTime>? date,
     Expression<bool>? started,
     Expression<bool>? finished,
+    Expression<bool>? mixer,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -388,6 +429,7 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
       if (date != null) 'date': date,
       if (started != null) 'started': started,
       if (finished != null) 'finished': finished,
+      if (mixer != null) 'mixer': mixer,
     });
   }
 
@@ -399,6 +441,7 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
     Value<DateTime>? date,
     Value<bool>? started,
     Value<bool>? finished,
+    Value<bool>? mixer,
   }) {
     return TournamentTableCompanion(
       id: id ?? this.id,
@@ -408,6 +451,7 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
       date: date ?? this.date,
       started: started ?? this.started,
       finished: finished ?? this.finished,
+      mixer: mixer ?? this.mixer,
     );
   }
 
@@ -435,6 +479,9 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
     if (finished.present) {
       map['finished'] = Variable<bool>(finished.value);
     }
+    if (mixer.present) {
+      map['mixer'] = Variable<bool>(mixer.value);
+    }
     return map;
   }
 
@@ -447,7 +494,8 @@ class TournamentTableCompanion extends UpdateCompanion<TournamentTableData> {
           ..write('points: $points, ')
           ..write('date: $date, ')
           ..write('started: $started, ')
-          ..write('finished: $finished')
+          ..write('finished: $finished, ')
+          ..write('mixer: $mixer')
           ..write(')'))
         .toString();
   }
@@ -1337,6 +1385,7 @@ typedef $$TournamentTableTableCreateCompanionBuilder =
       required DateTime date,
       required bool started,
       required bool finished,
+      required bool mixer,
     });
 typedef $$TournamentTableTableUpdateCompanionBuilder =
     TournamentTableCompanion Function({
@@ -1347,6 +1396,7 @@ typedef $$TournamentTableTableUpdateCompanionBuilder =
       Value<DateTime> date,
       Value<bool> started,
       Value<bool> finished,
+      Value<bool> mixer,
     });
 
 class $$TournamentTableTableFilterComposer
@@ -1390,6 +1440,11 @@ class $$TournamentTableTableFilterComposer
 
   ColumnFilters<bool> get finished => $composableBuilder(
     column: $table.finished,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get mixer => $composableBuilder(
+    column: $table.mixer,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1437,6 +1492,11 @@ class $$TournamentTableTableOrderingComposer
     column: $table.finished,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get mixer => $composableBuilder(
+    column: $table.mixer,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TournamentTableTableAnnotationComposer
@@ -1468,6 +1528,9 @@ class $$TournamentTableTableAnnotationComposer
 
   GeneratedColumn<bool> get finished =>
       $composableBuilder(column: $table.finished, builder: (column) => column);
+
+  GeneratedColumn<bool> get mixer =>
+      $composableBuilder(column: $table.mixer, builder: (column) => column);
 }
 
 class $$TournamentTableTableTableManager
@@ -1514,6 +1577,7 @@ class $$TournamentTableTableTableManager
                 Value<DateTime> date = const Value.absent(),
                 Value<bool> started = const Value.absent(),
                 Value<bool> finished = const Value.absent(),
+                Value<bool> mixer = const Value.absent(),
               }) => TournamentTableCompanion(
                 id: id,
                 name: name,
@@ -1522,6 +1586,7 @@ class $$TournamentTableTableTableManager
                 date: date,
                 started: started,
                 finished: finished,
+                mixer: mixer,
               ),
           createCompanionCallback:
               ({
@@ -1532,6 +1597,7 @@ class $$TournamentTableTableTableManager
                 required DateTime date,
                 required bool started,
                 required bool finished,
+                required bool mixer,
               }) => TournamentTableCompanion.insert(
                 id: id,
                 name: name,
@@ -1540,6 +1606,7 @@ class $$TournamentTableTableTableManager
                 date: date,
                 started: started,
                 finished: finished,
+                mixer: mixer,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

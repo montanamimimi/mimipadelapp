@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mimi Padel',
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepOrangeAccent),
+        colorScheme: .fromSeed(seedColor: Colors.lightGreenAccent),
       ),
       initialRoute: '/',
       onGenerateRoute: (settings) =>

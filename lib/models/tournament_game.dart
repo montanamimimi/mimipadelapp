@@ -22,6 +22,17 @@ class TournamentGame {
     required this.side2Score,
     });
 
+  @override
+  String toString() {
+      return 'Game (\n'
+      '  id: $id,\n'
+      '  tournamentId: $tournamentId,\n'      
+      '  roundNumber: $gameNumber,\n'
+      '  side1Score: $side1Score,\n'
+      '  side2Score: $side2Score\n'
+      ')';
+  }    
+
   TournamentGame copyWith({
     int? id,
     int? tournamentId,

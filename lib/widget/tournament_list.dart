@@ -1,44 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:mimipadel/models/tournament.dart';
+import 'package:mimipadel/controllers/home_controller.dart';
 import 'package:mimipadel/widget/tournament_item.dart';
-import 'package:mimipadel/repositories/tournament_repository.dart';
 
-class TournamentList extends StatefulWidget {
+class TournamentList extends StatelessWidget {
   
   const TournamentList({
     super.key, 
-    required this.tournaments,
-    required this.repository,
+    required this.controller,
+    required this.callback,
     });
 
-  final List<Tournament> tournaments;
-  final TournamentRepository repository;
-
-  @override
-  State<TournamentList> createState() => _TournamentListState();
-}
-
-class _TournamentListState extends State<TournamentList> {
-
-  late List<Tournament> tournaments;
-  
-  @override
-  void initState() {
-    super.initState();
-    tournaments = widget.tournaments;
-  }
+  final HomeController controller;
+  final VoidCallback callback;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-        spacing: 8.0,
-        children: tournaments.map((t) {
-          return TournamentItem(
-            tournament: t, 
-            repository: widget.repository,
-            );
-        }).toList(),
-      );
+      spacing: 8.0,
+      children: controller.tournaments.map((t) {
+        return TournamentItem(
+          tournament: t,
+          callback: callback,
+          );
+      }).toList(),
+    );
   }
 }
-

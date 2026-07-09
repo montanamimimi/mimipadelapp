@@ -11,7 +11,7 @@ class TournamentPlayer {
 
   @override
   String toString() {
-    return 'Tournament(id: $id, name: $name, tournament: $tournamentId)';
+    return 'Player(id: $id, name: $name, tournament: $tournamentId)';
   }
 
   TournamentPlayer copyWith({

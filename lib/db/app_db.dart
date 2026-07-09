@@ -68,6 +68,34 @@ class AppDatabase extends _$AppDatabase {
     .get();
   }
 
+  Future<int> removePlayer(int id) async {
+    return await (delete(tournamentPlayerTable)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  Future<void> addGames(List<TournamentGameTableCompanion> items) async {
+    await batch((batch) {
+      batch.insertAll(tournamentGameTable, items);
+    });
+  }
+
+  Future<List<TournamentGameTableData>> getTournamentGamesById(int id) async {
+    return await (select(tournamentGameTable)
+    ..where((tbl) => tbl.tournamentId.equals(id)))
+    .get();
+  }  
+
+  Future<List<TournamentGameTableData>> getTournamentGamesByIdAndRound(int id, int round) async {
+    return await (select(tournamentGameTable)
+    ..where((tbl) => tbl.tournamentId.equals(id) & tbl.gameNumber.equals(round)))
+    .get();
+  }
+
+  Future<void> updateGameScore(int id, TournamentGameTableCompanion entity) async {
+    await (update(tournamentGameTable)
+      ..where((tbl) => tbl.id.equals(id)))
+      .write(entity);
+  }  
+
   // DEV only 
 
   Future<void> cleanDatabase() async {

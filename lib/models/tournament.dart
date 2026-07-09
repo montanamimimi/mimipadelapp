@@ -8,6 +8,7 @@ class Tournament {
   int points;
   bool started;
   bool finished;
+  bool mixer;
 
   Tournament({
     required this.id,
@@ -17,11 +18,12 @@ class Tournament {
     this.points = 0,
     this.started = false,
     this.finished = false,
+    this.mixer = true,
     });
 
   @override
   String toString() {
-    return 'Tournament(id: $id, name: $name, date: $date, courts: $courts, points: $points, started: $started, finished: $finished)';
+    return 'Tournament(id: $id, name: $name, date: $date, courts: $courts, points: $points, mixer: $mixer, started: $started, finished: $finished)';
   }
 
   String getDate() {
@@ -36,6 +38,7 @@ class Tournament {
     int? points,
     bool? started,
     bool? finished,
+    bool? mixer,
   }) {
     return Tournament(
       id: id ?? this.id,
@@ -45,6 +48,7 @@ class Tournament {
       points: points ?? this.points,
       started: started ?? this.started,      
       finished: finished ?? this.finished,
+      mixer: mixer ?? this.mixer,
     );
   } 
 }

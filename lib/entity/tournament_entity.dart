@@ -8,4 +8,5 @@ class TournamentTable extends Table {
   DateTimeColumn get date => dateTime()();
   BoolColumn get started => boolean()();
   BoolColumn get finished => boolean()();
+  BoolColumn get mixer => boolean()();
 }
