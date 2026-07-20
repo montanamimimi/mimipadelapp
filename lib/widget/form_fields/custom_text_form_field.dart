@@ -8,30 +8,30 @@ class CustomTextFormField extends StatelessWidget {
     this.callback,
     this.required = false,
     this.defaultValue = "",
-
-    });
+    this.focusNode,
+  });
 
   final TextEditingController _controller;
   final String label;
   final String defaultValue;
   final Future<void> Function()? callback;
   final bool required;
-  // final _focusNode = FocusNode();
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext  context) {
     return TextFormField(
       controller: _controller,
       keyboardType: TextInputType.name,
+      textCapitalization: TextCapitalization.words,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         label: Text(label),
       ),
-      // Why don't work? 
-      autofocus: true,
-      onFieldSubmitted: (_) async {
+      focusNode: focusNode,      
+      onEditingComplete: () async {
         await callback?.call();
-      },      
+      },
       validator: required 
         ? (value) {
           if (value == null || value.isEmpty) {

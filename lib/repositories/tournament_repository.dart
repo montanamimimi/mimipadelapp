@@ -19,6 +19,10 @@ class TournamentRepository {
     return await local!.getTournaments();
   }
 
+  Future<void> cleanTournamentRoundGames(int id, int round) async {
+    await local!.cleanTournamentRoundGames(id, round);
+  }
+
   Future<Tournament?> getTournamentById(int id) async {
 
     if (kIsWeb) {
@@ -74,6 +78,10 @@ class TournamentRepository {
   Future<void> updateGameScore(int id, int side1, int side2) async {
     await local!.updateGameScore(id, side1, side2);
   }
+
+  Future<void> updatePlayerName(int id, String name) async {
+    await local!.updatePlayerName(id,name);
+  }  
 
   // Dev only 
 

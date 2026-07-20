@@ -1,4 +1,3 @@
-import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
 import 'package:mimipadel/models/tournament.dart';
 import 'package:flutter/material.dart';
@@ -86,12 +85,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   height: 100.0
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await _deleteData();
-                  }, 
-                  child: Text("Delete all data (!)")
-                ),
+                // ElevatedButton(
+                //   onPressed: () async {
+                //     await _deleteData();
+                //   }, 
+                //   child: Text("Delete all data (!)")
+                // ),
               ]
             ),
           ),

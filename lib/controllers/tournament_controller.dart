@@ -17,16 +17,7 @@ class TournamentController extends ChangeNotifier {
   List<TournamentStanding> standings = [];
   bool gameReady = false; 
   int round = 0;
-
   bool roundReady = false;
-
-  // bool _roundReady = false;
-  // bool get roundReady => _roundReady;
-  // set roundReady(bool value) {
-  //   if (_roundReady == value) return;
-  //   _roundReady = value;
-  //   notifyListeners();
-  // }  
 
   Future<void> load(int id) async {
     tournament = await repository.getTournamentById(id);
@@ -65,6 +56,17 @@ class TournamentController extends ChangeNotifier {
     await repository.updateTournament(tournament!);
   }  
 
+  Future<void> updatePlayerName(int id, String name) async {
+    await repository.updatePlayerName(id, name);
+
+    final index = players.indexWhere((p) => p.id == id);
+    if (index != -1) {
+      players[index] = players[index].copyWith(name: name);
+    }
+
+    notifyListeners();
+  }  
+
   Future<int> create(Tournament tournament) async {
     final t = await repository.createTournament(tournament);
     return t.id;
@@ -78,12 +80,14 @@ class TournamentController extends ChangeNotifier {
     await repository.addPlayer(tournament!.id, name);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
+    notifyListeners();
   }
 
   Future<void> removePlayer(int id) async {
     await repository.removePlayer(id);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
+    notifyListeners();
   }
 
   Future<void> startTournament() async {
@@ -91,10 +95,12 @@ class TournamentController extends ChangeNotifier {
     await update();
 
     if (games.isEmpty) {
-      generateRandomGames();
-      await repository.insertTournamentGames(games);
+      final newGames = generateRandomGames();
+      await repository.insertTournamentGames(newGames);
       games = await repository.getTournamentGamesById(tournament!.id);
     }
+
+    roundReady = false;
   }
 
   // Manage games
@@ -131,25 +137,49 @@ class TournamentController extends ChangeNotifier {
     }
 
     notifyListeners();
-  }  
+  } 
+
+  // Totally reshuffle current round
+
+  Future<void> shuffleRound() async {
+    final newGames = generateRandomGames();
+    await repository.cleanTournamentRoundGames(tournament!.id, round);
+    await repository.insertTournamentGames(newGames);
+    games = await repository.getTournamentGamesById(tournament!.id);
+  }
+
+  // Recalculate round results based on games
+
+  Future<void> recalculateRound() async {
+    await repository.cleanTournamentRoundGames(tournament!.id, round);
+    games = await repository.getTournamentGamesById(tournament!.id);    
+    final newGames = generateRoundGames();    
+    await repository.insertTournamentGames(newGames);
+    games = await repository.getTournamentGamesById(tournament!.id);
+  }
+
+  int getMaxRound() {
+    return games
+        .map((g) => g.gameNumber)
+        .reduce((a, b) => a > b ? a : b);
+  }
 
   Future<void> nextRound() async {
     round = round + 1;
+    notifyListeners();
 
-    final maxRound = games
-        .map((g) => g.gameNumber)
-        .reduce((a, b) => a > b ? a : b);    
+    final maxRound = getMaxRound();
 
     if (round > maxRound) {
       final newGames = generateRoundGames();
-      await repository.insertTournamentGames(newGames);
-      // await load (tournament!.id);
+      await repository.insertTournamentGames(newGames);     
       games = await repository.getTournamentGamesById(tournament!.id);
     }
     checkRoundReady();
   }
 
   Future<void> prevRound() async {
+    notifyListeners();
     round = round - 1;
     checkRoundReady(); 
   }   
@@ -172,37 +202,62 @@ class TournamentController extends ChangeNotifier {
       newStandings[game.side1Player2Id]?.score += game.side1Score;
       newStandings[game.side2Player1Id]?.score += game.side2Score;
       newStandings[game.side2Player2Id]?.score += game.side2Score;
+      newStandings[game.side1Player1Id]?.diff += game.side1Score - game.side2Score;
+      newStandings[game.side1Player2Id]?.diff += game.side1Score - game.side2Score;
+      newStandings[game.side2Player1Id]?.diff += game.side2Score - game.side1Score;
+      newStandings[game.side2Player2Id]?.diff += game.side2Score - game.side1Score;
+
+      if (game.side1Score > game.side2Score) {
+        newStandings[game.side1Player1Id]?.win += 1;
+        newStandings[game.side1Player2Id]?.win += 1;
+        newStandings[game.side2Player1Id]?.lose += 1;
+        newStandings[game.side2Player2Id]?.lose += 1;
+      } else if (game.side2Score > game.side1Score) {
+        newStandings[game.side1Player1Id]?.lose += 1;
+        newStandings[game.side1Player2Id]?.lose += 1;
+        newStandings[game.side2Player1Id]?.win += 1;
+        newStandings[game.side2Player2Id]?.win += 1;
+      } else if ((game.side2Score == game.side1Score) && (game.side2Score > 0) && (game.side1Score > 0)) {
+        newStandings[game.side1Player1Id]?.tie += 1;
+        newStandings[game.side1Player2Id]?.tie += 1;
+        newStandings[game.side2Player1Id]?.tie += 1;
+        newStandings[game.side2Player2Id]?.tie += 1;
+      }
     }
 
-    standings = newStandings.values.toList()
-      ..sort((a, b) => b.score.compareTo(a.score));    
+    standings = newStandings.values.toList(); 
 
     standings.sort((a, b) {
-      final scoreCompare = b.score.compareTo(a.score);
+      int result;
 
-      return scoreCompare != 0
-          ? scoreCompare
-          : a.playerName.compareTo(b.playerName);
+      result = b.score.compareTo(a.score); 
+      if (result != 0) return result;
+
+      result = b.win.compareTo(a.win);
+      if (result != 0) return result;
+
+      result = a.lose.compareTo(b.lose);
+      if (result != 0) return result;
+
+      return a.playerName.compareTo(b.playerName); // ascending
     });
   }    
 
   List<TournamentGame> generateRoundGames() {
-    calculateStandings();
+    calculateStandings();   
 
     final List<TournamentGame> newGames = [];
     
     int playerIndex = 0;
-
+    final List<List<int>> previousPairing = getPreviousPairing();
     for( var i = 0; i < tournament!.courts; i++) {
 
       var player1 = standings[playerIndex].playerId;
-      var player2 = standings[playerIndex + 1].playerId;
-      var player3 = standings[playerIndex + 2].playerId;
+      var player2 = standings[playerIndex + 2].playerId;
+      var player3 = standings[playerIndex + 1].playerId;
       var player4 = standings[playerIndex + 3].playerId;
 
-      if (tournament!.mixer) {
-
-        final List<List<int>> previousPairing = getPreviousPairing();
+      if (tournament!.mixer) {       
         final List<int> checked = checkPlayers(player1, player2, player3, player4, previousPairing);
         player1 = checked[0];
         player2 = checked[1];
@@ -234,9 +289,12 @@ class TournamentController extends ChangeNotifier {
 
     for(var game in games) {
       if (game.gameNumber == (round-1)) {
-        final item = [game.side1Player1Id, game.side1Player2Id];
-        item.sort();
-        arr.add(item);
+        final item1 = [game.side1Player1Id, game.side1Player2Id];
+        item1.sort();
+        arr.add(item1);
+        final item2 = [game.side2Player1Id, game.side2Player2Id];
+        item2.sort();
+        arr.add(item2);        
       }
     }
 
@@ -266,15 +324,16 @@ class TournamentController extends ChangeNotifier {
     
   }
 
-  void generateRandomGames() {
+  List<TournamentGame> generateRandomGames() {
     players.shuffle();
     int playerIndex = 0;
+    final List<TournamentGame> randomGames = [];
 
     for( var i = 0; i < tournament!.courts; i++) {
       TournamentGame game = TournamentGame(
         id: i, 
         tournamentId: tournament!.id, 
-        gameNumber: 0, 
+        gameNumber: round,
         side1Player1Id: players[playerIndex].id, 
         side1Player2Id: players[playerIndex+1].id, 
         side2Player1Id: players[playerIndex+2].id, 
@@ -283,8 +342,10 @@ class TournamentController extends ChangeNotifier {
         side2Score: 0
         );
       playerIndex = playerIndex + 4;  
-      games.add(game);
-    }   
+      randomGames.add(game);
+    }
+    
+    return randomGames;
   }
 
   void checkReady() {

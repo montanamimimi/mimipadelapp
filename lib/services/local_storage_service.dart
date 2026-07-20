@@ -67,6 +67,12 @@ class LocalStorageService {
     return tournament.copyWith(id: id);
   }
 
+  // Delete games by round and tournament id
+
+  Future<void> cleanTournamentRoundGames(int id, int round) async {
+    await db.deleteGamesByRoundAndTournamentId(id, round);
+  }
+
   Future<void> updateTournament(Tournament tournament) async {    
     await db.updateTournament(
       TournamentTableCompanion(
@@ -181,6 +187,15 @@ class LocalStorageService {
       TournamentGameTableCompanion(        
         side1Score: Value(side1),
         side2Score: Value(side2),        
+      )
+    );
+  }
+
+  Future<void> updatePlayerName(int id, String name) async {
+    await db.updatePlayer(
+      id, 
+      TournamentPlayerTableCompanion(        
+        name: Value(name)       
       )
     );
   }

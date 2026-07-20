@@ -24,13 +24,7 @@ class TournamentGame {
 
   @override
   String toString() {
-      return 'Game (\n'
-      '  id: $id,\n'
-      '  tournamentId: $tournamentId,\n'      
-      '  roundNumber: $gameNumber,\n'
-      '  side1Score: $side1Score,\n'
-      '  side2Score: $side2Score\n'
-      ')';
+      return 'Game id: $id, roundNumber: $gameNumber, side1Score: $side1Score, side2Score: $side2Score, p1: $side1Player1Id, p2: $side1Player2Id, p3: $side2Player1Id, p4: $side2Player2Id';
   }    
 
   TournamentGame copyWith({

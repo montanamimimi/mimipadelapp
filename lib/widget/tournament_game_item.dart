@@ -62,32 +62,77 @@ class _TournamentGameItemState extends State<TournamentGameItem> {
       return Padding(
         padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               "Court ${widget.index + 1}",
               style: TextStyle(
-                backgroundColor: Colors.amber,
-                fontSize: 18.0,
+                fontSize: 14.0,
               ),              
             ),
-            SizedBox(
-              height: 20.0,
-            ),
+            // SizedBox(
+            //   height: 20.0,
+            // ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 12.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,                
+                    crossAxisAlignment: CrossAxisAlignment.start, 
                     children: [
-                      Text(player1),
-                      Text(player2),
+                      Text(
+                        player1,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        player2,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),                        
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      )                       
                     ],
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        player3,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),                        
+                      ),
+                      Text(
+                        player4,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),                        
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      )                  
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -106,17 +151,9 @@ class _TournamentGameItemState extends State<TournamentGameItem> {
                       ),
                     ],
                   ),
-                ),              
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 12.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(player3),
-                      Text(player4),
-                    ],
-                  ),
+                ),       
+                SizedBox(
+                  width: 20.0,
                 ),
                 Expanded(
                   child: Column(

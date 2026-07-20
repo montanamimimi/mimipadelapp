@@ -52,6 +52,14 @@ class AppDatabase extends _$AppDatabase {
     return await (delete(tournamentTable)..where((tbl) => tbl.id.equals(id))).go();
   }
 
+  Future<void> deleteGamesByRoundAndTournamentId(int id, int round) async {
+    await (delete(tournamentGameTable)
+          ..where((tbl) => 
+          tbl.tournamentId.equals(id) &
+          tbl.gameNumber.equals(round)))
+          .go();
+  }
+
   Future<int> addPlayer(TournamentPlayerTableCompanion player) async {
     return await into(tournamentPlayerTable).insert(player);
   }
@@ -95,6 +103,13 @@ class AppDatabase extends _$AppDatabase {
       ..where((tbl) => tbl.id.equals(id)))
       .write(entity);
   }  
+
+
+  Future<void> updatePlayer(int id, TournamentPlayerTableCompanion entity) async {
+    await (update(tournamentPlayerTable)
+      ..where((tbl) => tbl.id.equals(id)))
+      .write(entity);
+  }    
 
   // DEV only 
 

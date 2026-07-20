@@ -20,25 +20,37 @@ class PlayTournamentView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
-          children: [
-            Text(controller.tournament!.getDate()),
-            Text("Current round: ${controller.round + 1}"),
-            ElevatedButton(
-              onPressed: () { 
-                //print(controller.tournament);
-                print(controller.standings);
-                // print(controller.games);
-                // print(controller.players);
-              }, 
-              child: Text("Debug Print tournament data")
+        children: [
+          // Text(controller.tournament!.getDate()),
+          ListenableBuilder(
+            listenable: controller, 
+            builder: (context, child) {
+              return Text(
+                  "ROUND ${controller.round + 1}",
+                  style: TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.bold,
+                  )
+                );
+              }
+
+          ),
+          // ElevatedButton(
+          //   onPressed: () { 
+          //     print(controller.tournament);
+          //     // print(controller.standings);
+          //     // print(controller.games);
+          //     // print(controller.players);
+          //   }, 
+          //   child: Text("Debug Print tournament data")
+          // ),
+          TournamentRound(
+            onNextRound: onNextRound,
+            onPrevRound: onPrevRound,
+            controller: controller,
             ),
-            TournamentRound(
-              onNextRound: onNextRound,
-              onPrevRound: onPrevRound,
-              controller: controller,
-              ),            
-          ],
-        ),        
+        ],
+      ),
     );
   }
 }

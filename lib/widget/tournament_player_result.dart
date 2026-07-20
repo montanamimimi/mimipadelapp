@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
-// import 'package:mimipadel/models/tournament.dart';
-// import 'package:mimipadel/widget/tournament_game_item.dart';
-// import 'package:mimipadel/controllers/tournament_controller.dart';
-// import 'package:mimipadel/models/tournament_game.dart';
-// import 'package:mimipadel/models/tournament_player.dart';
+import 'package:mimipadel/models/tournament_standing.dart';
 
 class TournamentPlayerResult extends StatelessWidget {
 
     const TournamentPlayerResult({
       super.key, 
-
-      required this.name,
-      required this.score,
-  
+      required this.place,
+      required this.standing,
     });
 
-    final String name;
-    final int score;
-    
+    final TournamentStanding standing;
+    final int place;
 
     @override
     Widget build(BuildContext context) {          
@@ -28,15 +21,19 @@ class TournamentPlayerResult extends StatelessWidget {
         ),
         child: Row(        
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: [              
               Text(
-                name, 
+                "$place. ${standing.playerName}", 
                 style: TextStyle(
                   fontSize: 18.0,
                 )
               ),
               Text(
-                score.toString(),
+                "${standing.win}-${standing.lose}-${standing.tie}"
+              ),
+              Text(standing.diff.toString()),
+              Text(
+                standing.score.toString(),
                 style: TextStyle(
                   fontSize: 22.0,
                 )                

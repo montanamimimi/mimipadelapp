@@ -72,47 +72,4 @@ class TournamentRound extends StatelessWidget {
           )
       );
     }
-
-    // @override
-    // Widget build(BuildContext context) {
-    //   return Expanded(
-    //     child: ListenableBuilder(
-    //       listenable: controller,
-    //       builder: (context, child) {
-    //         final roundGames = getRoundGames();
-
-    //         return ListView(
-    //           children: [
-    //             Row(
-    //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //               children: [
-    //                 if (controller.round > 0)
-    //                   IconButton(
-    //                     onPressed: onPrevRound,
-    //                     icon: const Icon(Icons.arrow_left),
-    //                   ),
-
-    //                 if (controller.roundReady)
-    //                   IconButton(
-    //                     onPressed: onNextRound,
-    //                     icon: const Icon(Icons.arrow_right),
-    //                   ),
-    //               ],
-    //             ),
-
-    //             for (int i = 0; i < roundGames.length; i++)
-    //               TournamentGameItem(
-    //                 key: ValueKey(roundGames[i].id),
-    //                 game: roundGames[i],
-    //                 gameId: roundGames[i].id,
-    //                 index: i,
-    //                 callback: () {},
-    //                 controller: controller,
-    //               ),
-    //           ],
-    //         );
-    //       },
-    //     ),
-    //   );
-    // }    
 }

@@ -62,12 +62,12 @@ class _TournamentScreenState extends State<TournamentScreen> {
     controller = widget.controller;
 
     mode = widget.mode;
+
     if (!(mode == TournamentScreenMode.create)) {
-      _loadTournament(null);
+      _loadTournament(null);      
     } else {
-      isLoading = false;
+      isLoading = false;      
     }
-       
   }
 
   Widget buildBody() {
@@ -127,14 +127,27 @@ class _TournamentScreenState extends State<TournamentScreen> {
   @override 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(                        
-        title: mode == TournamentScreenMode.create
-        ? const Text('Create tournament')
-        : Text(controller.tournament?.name ?? 'Loading...'),
-        
-        centerTitle: true,
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Image(
+              image: AssetImage('assets/images/mimi_logo_xs.png'),
+              width: 40.0,
+              height: 40.0,
+            ),
+            SizedBox(
+              width: 20.0,
+            ),
+            if (mode == TournamentScreenMode.create)
+            const Text('Create tournament')
+            else
+            Text(controller.tournament?.name ?? 'Loading...'),
+          ]
+        ),
+        elevation: 2.0,
+        shadowColor: Colors.black,
         actions: [
-          if (mode == TournamentScreenMode.play)
+          if ((mode == TournamentScreenMode.play) || (mode == TournamentScreenMode.edit))
           IconButton(
             onPressed: () {              
               setState(() {
@@ -147,7 +160,11 @@ class _TournamentScreenState extends State<TournamentScreen> {
           IconButton(
             onPressed: () {              
               setState(() {
-                mode = TournamentScreenMode.play;
+                if (controller.tournament!.started) {
+                  mode = TournamentScreenMode.play;
+                } else {
+                  mode = TournamentScreenMode.edit;
+                }                
               });
             }, 
             icon: Icon(Icons.save),
@@ -191,7 +208,7 @@ class _TournamentScreenState extends State<TournamentScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.person
+              Icons.emoji_events_rounded
             ),
             label: 'Results'
           ),

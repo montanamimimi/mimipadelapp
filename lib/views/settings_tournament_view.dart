@@ -1,5 +1,7 @@
 import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:mimipadel/widget/dialogs/text_input_dialog.dart';
+import 'package:mimipadel/widget/dialogs/confirm_dialog.dart';
 
 class SettingsTournamentView extends StatefulWidget {
 
@@ -17,55 +19,10 @@ class SettingsTournamentView extends StatefulWidget {
 class _SettingsTournamentViewState extends State<SettingsTournamentView> {
   
   Future<void> _deleteTournament() async {
-
-    // ADD ARE YOU SURE HERE 
-
     await widget.controller.delete();
     if (!mounted) return;
     Navigator.pop(context, true);
   }
-
-  // Make it universal to rename players also 
-
-  void showNameDialog(BuildContext context) {
-    
-    final textController = TextEditingController(
-      text: widget.controller.tournament!.name
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Rename tournament"),
-          content: TextField(            
-            controller: textController,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Tournament name',
-            ),
-          ),
-          actions: [            
-            TextButton(
-              onPressed: () {                
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                widget.controller.updateName(textController.text);
-                if (!context.mounted) return;
-
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }   
 
   @override 
   Widget build(BuildContext context) {
@@ -84,8 +41,17 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                   Text("Title: "),
                   Text(widget.controller.tournament!.name),
                   IconButton(
-                    onPressed: () {
-                      showNameDialog(context);
+                    onPressed: () async {
+                      final name = await showTextInputDialog(
+                        context: context,
+                        title: 'Rename tournament',
+                        initialValue: widget.controller.tournament!.name,
+                        hintText: 'Tournament name',
+                      );
+
+                      if (name != null && name.isNotEmpty) {
+                        widget.controller.updateName(name);                       
+                      }                      
                     }, 
                     icon: Icon(
                       Icons.edit
@@ -102,7 +68,7 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                   Switch(
                     value: widget.controller.tournament!.mixer,
                     onChanged: widget.controller.switchMixer,
-                  ),                  
+                  ),
                 ],
               ),
               Row(
@@ -115,9 +81,9 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                     icon: Icon(
                       Icons.edit
                     )
-                  )            
+                  )
                 ],
-              ),              
+              ),
               Expanded(
                 child: ListView(
                   children: [
@@ -127,7 +93,25 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                         final player = entry.value;
                 
                         return Row(
-                          children: [                    
+                          children: [     
+                            IconButton(
+                              onPressed: () async {
+                               
+                                final name = await showTextInputDialog(
+                                context: context,
+                                title: 'Rename player',
+                                initialValue: entry.value.name,                           
+                                );
+
+                                if (name != null && name.isNotEmpty) {
+                                  widget.controller.updatePlayerName(entry.value.id, name);                       
+                                }   
+                              }, 
+                              icon: Icon(
+                                Icons.edit,
+                                size: 14.0
+                              )
+                            ),
                             Text('${(index + 1).toString()}.'),
                             SizedBox(
                               width: 10.0,
@@ -137,15 +121,53 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                         );
                       },
                     ),
+                    // ElevatedButton(
+                    //   onPressed: () { 
+                    //     print(widget.controller.tournament);                    
+                    //   }, 
+                    //   child: Text("Debug Print tournament data")
+                    // ),
+                    if((widget.controller.round) > 0 && (widget.controller.round == widget.controller.getMaxRound())) 
                     ElevatedButton(
-                      onPressed: () { 
-                        print(widget.controller.tournament);                    
-                      }, 
-                      child: Text("Debug Print tournament data")
-                    ),                
+                      onPressed: () async { 
+                        await widget.controller.recalculateRound();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Tournament recalculated!')),
+                        );               
+                      },
+                      child: Text("Recalculate round results")
+                    ),                      
+                    if (widget.controller.tournament!.started && (widget.controller.round == widget.controller.getMaxRound()))
+                    ElevatedButton(
+                      onPressed: () async { 
+                        final result = await showConfirmDialog(
+                          context: context,
+                          title: 'Randomize round?',                         
+                          hintText: 'You can not undo it',
+                          confirmButtonText: 'Shuffle!'
+                        );       
+                        
+                        if (result == "sure") {
+                          await widget.controller.shuffleRound();             
+                        }                    
+                        
+                      },
+                      child: Text("Randomize Current Round")
+                    ),
+                  
                     ElevatedButton(
                       onPressed: () async {
-                        await _deleteTournament();
+                        final result = await showConfirmDialog(
+                          context: context,
+                          title: 'You sure want to delete it?',                         
+                          hintText: 'You can not undo it',
+                          confirmButtonText: 'Delete'
+                        );
+
+                        if (result == "sure") {
+                          await _deleteTournament();                  
+                        }    
                       },
                       child: Row (
                         children: [
