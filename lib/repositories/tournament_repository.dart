@@ -12,10 +12,6 @@ class TournamentRepository {
   TournamentRepository({required this.local});
 
   Future<List<Tournament>> getTournaments() async {
-
-    if (kIsWeb) {
-    }
-
     return await local!.getTournaments();
   }
 

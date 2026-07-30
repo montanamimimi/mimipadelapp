@@ -1,12 +1,11 @@
-import 'package:mimipadel/controllers/home_controller.dart';
-import 'package:mimipadel/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+// import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:mimipadel/services/auth.dart';
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key, required this.controller});
+  const LoadingScreen({super.key, required this.auth});  
 
-  final HomeController controller;
+  final AuthService auth;
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -14,42 +13,61 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
-  Future<void> _bootstrap() async {  
-    if (!mounted) return;
-    Navigator.pushReplacement(
+ // final AuthService _auth = AuthService();
+
+  void _checkUser() {  
+    final user = widget.auth.currentUser();
+
+    if (user != null) {
+      _goToHomeScreen();
+    } else {
+      print('no user');
+    }
+
+  }
+
+  void _goToHomeScreen() {
+    Navigator.pushReplacementNamed(
       context,
-      MaterialPageRoute(
-        builder: (_) => HomeScreen(
-          controller: widget.controller,
-        ),
-      ),
-    );
+      '/home'
+    );   
   }
 
   @override
   void initState() {
     super.initState();
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _bootstrap();
+      _checkUser();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(      
-      backgroundColor: Colors.blueAccent,
+      appBar: AppBar(
+        elevation: 8.0,
+        title: Text('Sign in')
+      ),
       body: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage('assets/images/loading.png'),
-                alignment: Alignment.topCenter,
-              ),
-          ),
-          child: SpinKitFadingCircle(
-            color: Colors.white,
-            size: 80.0,
-          ),
+        child: Column(
+          children: [
+            Image(
+              image: AssetImage('assets/images/loading.png'),
+              width: 100.0,
+              height: 100.0,
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                dynamic result = await widget.auth.signInAnon();
+                
+                if (result != null) {                  
+                  _goToHomeScreen();
+                }
+              }, 
+              child: Text('Sing in anon')
+            )                             
+          ]
         )
       ),
     );

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mimipadel/controllers/home_controller.dart';
+import 'package:mimipadel/models/mimi_user.dart';
+import 'package:mimipadel/screens/loading_screen.dart';
+import 'package:mimipadel/services/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -8,19 +13,23 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int counter = 0;
-  final TextEditingController _controller = TextEditingController();
+  
+  final AuthService _auth = AuthService();
+  late User user;  
 
-  void getCounter() async {
-    counter = await Future.delayed(Duration(seconds: 2), () {
-      return 10;
+  void _getUser() {
+    setState(() {
+      user = _auth.currentUser();      
     });
+
+    print(user);
   }
 
   @override
   void initState() {
     super.initState();
-    getCounter();
+    print('init');
+    _getUser();
   }
 
   @override
@@ -44,44 +53,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               
               children: [
-                  TextFormField(
-                    controller: _controller, 
-                    keyboardType: TextInputType.name,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text("Your name")
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Name cannot be empty!';
-                      }
-                    }
-                  ),
-                  SizedBox(height: 100.0),
+
                   CircleAvatar(
                     backgroundImage: AssetImage('assets/images/person.jpg'),
                     radius: 50.0,
-                  ),                
-                  Divider(
-                    height: 10.0,                  
-                  ),
-                  Text('Counter: $counter'),
-                  IconButton(                    
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/');
+                  ),         
+                  Text('User id ${user.uid}'),    
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _auth.signOut();
+                      if (!context.mounted) return;
+                      Navigator.pushReplacementNamed(context, '/');                             
                     }, 
-                    icon: Icon(Icons.home),                     
-                    )
+                    child: Text('Sign Out')
+                  )
               ],),
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(          
-          onPressed: () => {
-            setState(() => counter++)
-          },        
-          child: Icon(
-            Icons.add,
-            size: 50.0,
           ),
         ),
       );

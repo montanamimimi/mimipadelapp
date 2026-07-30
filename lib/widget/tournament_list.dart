@@ -15,6 +15,7 @@ class TournamentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(controller.tournaments);
     return Column(
       spacing: 8.0,
       children: controller.tournaments.map((t) {

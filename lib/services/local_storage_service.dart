@@ -12,7 +12,7 @@ class LocalStorageService {
 
   // Get all tournaments
   
-  Future<List<Tournament>> getTournaments() async {
+  Future<List<Tournament>> getTournaments() async {    
 
     final rows = await db.getTournaments();
 

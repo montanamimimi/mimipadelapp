@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mimipadel/repositories/tournament_repository.dart';
 import 'package:mimipadel/models/tournament.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeController extends ChangeNotifier {
   HomeController({
@@ -15,7 +16,8 @@ class HomeController extends ChangeNotifier {
     await repository.cleanDatabase();
   }
 
-  Future<void> getTournaments() async {
+  Future<void> getTournaments() async {    
     tournaments = await repository.getTournaments();
+    notifyListeners();
   }
 }

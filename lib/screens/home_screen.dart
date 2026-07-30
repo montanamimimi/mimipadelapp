@@ -1,5 +1,5 @@
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
-import 'package:mimipadel/models/tournament.dart';
+// import 'package:mimipadel/models/tournament.dart';
 import 'package:flutter/material.dart';
 import 'package:mimipadel/widget/tournament_list.dart';
 import 'package:mimipadel/controllers/home_controller.dart';
@@ -17,16 +17,11 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-
-  List<Tournament> tournaments = [];
-  int currentIndex = 0;
+class _HomeScreenState extends State<HomeScreen> {  
 
   Future<void> _load() async {
     await widget.controller.getTournaments();
-    setState(() {
-      tournaments = widget.controller.tournaments;
-    });
+    print(widget.controller.tournaments);
   }
 
   @override
@@ -35,15 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _load();
   }
 
-  Future<void> _deleteData() async {
-    await widget.controller.deleteAllData();
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, '/');
-  }
-
   @override
   Widget build(BuildContext context) {
-
+    print(widget.controller.tournaments);
     return Scaffold(
         appBar: AppBar(
           title: Row(
@@ -85,39 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   height: 100.0
                 ),
-                // ElevatedButton(
-                //   onPressed: () async {
-                //     await _deleteData();
-                //   }, 
-                //   child: Text("Delete all data (!)")
-                // ),
               ]
             ),
           ),
         ),
-        // bottomNavigationBar: BottomNavigationBar(         
-        //   onTap: (index) {
-        //     if (index == 1) {
-        //       Navigator.pushNamed(context, '/profile');
-        //     }
-        //   },
-        //   backgroundColor: Colors.green[100],
-        //   elevation: 10.0,
-        //   items: [
-        //     BottomNavigationBarItem(
-        //       icon: Icon(
-        //         Icons.home
-        //       ),
-        //       label: 'Home',              
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: Icon(
-        //         Icons.person
-        //       ),
-        //       label: 'Profile'
-        //     ),
-        //   ],
-        // ),
         floatingActionButton: FloatingActionButton(          
           onPressed: () async {                      
             final result = await Navigator.pushNamed(context, '/tournament', arguments: {

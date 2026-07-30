@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "245806687867",
+    "project_id": "mimi-padel-app",
+    "storage_bucket": "mimi-padel-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245806687867:android:3a9ca05544b663aca464de",
+        "android_client_info": {
+          "package_name": "com.montana.mimimi.mimipadel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "245806687867-pb7r3u1rhdoni2pps6dqp69cj0gi7l10.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoJL0YJMXrMffdt0PFCH6fTFy0o18d6mo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245806687867-pb7r3u1rhdoni2pps6dqp69cj0gi7l10.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
