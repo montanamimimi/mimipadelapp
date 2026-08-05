@@ -21,7 +21,7 @@ class TournamentListController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(String id) async {
     await repository.deleteTournament(id);
 
     tournaments.removeWhere((e) => e.id == id);

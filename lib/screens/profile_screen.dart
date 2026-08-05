@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:mimipadel/controllers/home_controller.dart';
-import 'package:mimipadel/models/mimi_user.dart';
-import 'package:mimipadel/screens/loading_screen.dart';
+// import 'package:mimipadel/controllers/home_controller.dart';
+// import 'package:mimipadel/models/mimi_user.dart';
+// import 'package:mimipadel/screens/loading_screen.dart';
 import 'package:mimipadel/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, required this.auth});
+
+  final AuthService auth;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -14,21 +16,18 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   
-  final AuthService _auth = AuthService();
-  late User user;  
+  // final AuthService _auth = AuthService();
+  late User? user;  
 
   void _getUser() {
     setState(() {
-      user = _auth.currentUser();      
+      user = widget.auth.currentUser();      
     });
-
-    print(user);
   }
 
   @override
   void initState() {
     super.initState();
-    print('init');
     _getUser();
   }
 
@@ -58,10 +57,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundImage: AssetImage('assets/images/person.jpg'),
                     radius: 50.0,
                   ),         
-                  Text('User id ${user.uid}'),    
+                  Text('User id ${user!.uid}'),  
                   ElevatedButton(
                     onPressed: () async {
-                      await _auth.signOut();
+                      final user = await widget.auth.syncUser();
+                      print(user);
+                    }, 
+                    child: Text('test Me')
+                  ),                                  
+                  ElevatedButton(
+                    onPressed: () async {
+                      await widget.auth.signOut();
                       if (!context.mounted) return;
                       Navigator.pushReplacementNamed(context, '/');                             
                     }, 

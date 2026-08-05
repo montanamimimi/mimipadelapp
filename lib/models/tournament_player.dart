@@ -1,6 +1,6 @@
 class TournamentPlayer {
-  int id;
-  int tournamentId;
+  final String id;
+  final String tournamentId;
   String name;
 
   TournamentPlayer({
@@ -15,8 +15,8 @@ class TournamentPlayer {
   }
 
   TournamentPlayer copyWith({
-    int? id,
-    int? tournamentId,
+    String? id,
+    String? tournamentId,
     String? name,
   }) {
     return TournamentPlayer(

@@ -4,6 +4,7 @@ import 'package:mimipadel/models/tournament.dart';
 import 'package:mimipadel/models/tournament_game.dart';
 import 'package:mimipadel/models/tournament_standing.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ulid/ulid.dart';
 
 class TournamentController extends ChangeNotifier {
 
@@ -19,7 +20,7 @@ class TournamentController extends ChangeNotifier {
   int round = 0;
   bool roundReady = false;
 
-  Future<void> load(int id) async {
+  Future<void> load(String id) async {
     tournament = await repository.getTournamentById(id);
     if (tournament == null) {
       return;
@@ -32,7 +33,7 @@ class TournamentController extends ChangeNotifier {
       checkReady();
     } else {
       round = games
-          .map((g) => g.gameNumber)
+          .map((g) => g.round)
           .reduce((a, b) => a > b ? a : b);      
     }
 
@@ -56,7 +57,7 @@ class TournamentController extends ChangeNotifier {
     await repository.updateTournament(tournament!);
   }  
 
-  Future<void> updatePlayerName(int id, String name) async {
+  Future<void> updatePlayerName(String id, String name) async {
     await repository.updatePlayerName(id, name);
 
     final index = players.indexWhere((p) => p.id == id);
@@ -67,9 +68,22 @@ class TournamentController extends ChangeNotifier {
     notifyListeners();
   }  
 
-  Future<int> create(Tournament tournament) async {
-    final t = await repository.createTournament(tournament);
-    return t.id;
+  Future<String> create(String name, DateTime date, int courts, int points) async {
+    final id = Ulid().toString();
+
+    print(id);
+
+    await repository.createTournament(
+      Tournament(
+        id: id,
+        name: name,
+        date: date,
+        courts: courts,
+        points: points,      
+      )
+    );
+
+    return id;
   }  
 
   Future<void> delete() async {
@@ -77,13 +91,14 @@ class TournamentController extends ChangeNotifier {
   }
 
   Future<void> addPlayer(String name) async {
-    await repository.addPlayer(tournament!.id, name);
+    final id = Ulid().toString();
+    await repository.addPlayer(id, tournament!.id, name);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
     notifyListeners();
   }
 
-  Future<void> removePlayer(int id) async {
+  Future<void> removePlayer(String id) async {
     await repository.removePlayer(id);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
@@ -91,7 +106,7 @@ class TournamentController extends ChangeNotifier {
   }
 
   Future<void> startTournament() async {
-    tournament!.started = true;    
+    tournament!.started = true;
     await update();
 
     if (games.isEmpty) {
@@ -105,7 +120,7 @@ class TournamentController extends ChangeNotifier {
 
   // Manage games
 
-  Future<void> updateGameScore(int id, int side1, int side2) async {
+  Future<void> updateGameScore(String id, int side1, int side2) async {
     for (var i = 0; i < games.length; i++) {
       if (games[i].id == id) {
         games[i].side1Score = side1;
@@ -127,7 +142,7 @@ class TournamentController extends ChangeNotifier {
       bool gameReady = true;      
 
       for (final game in games) {
-        if (game.gameNumber == round) {
+        if (game.round == round) {
           if ((game.side1Score + game.side2Score) != tournament!.points) {
             gameReady = false;
           }
@@ -159,9 +174,15 @@ class TournamentController extends ChangeNotifier {
   }
 
   int getMaxRound() {
-    return games
-        .map((g) => g.gameNumber)
-        .reduce((a, b) => a > b ? a : b);
+
+    if (games.length > 0) {
+      return games
+          .map((g) => g.round)
+          .reduce((a, b) => a > b ? a : b);
+    } else {
+      return 0;
+    }
+
   }
 
   Future<void> nextRound() async {
@@ -184,7 +205,7 @@ class TournamentController extends ChangeNotifier {
     checkRoundReady(); 
   }   
 
-  String getPlayerName(int id) {
+  String getPlayerName(String id) {
     return players.firstWhere((e) => e.id == id).name;
   }  
 
@@ -249,7 +270,7 @@ class TournamentController extends ChangeNotifier {
     final List<TournamentGame> newGames = [];
     
     int playerIndex = 0;
-    final List<List<int>> previousPairing = getPreviousPairing();
+    final List<List<String>> previousPairing = getPreviousPairing();
     for( var i = 0; i < tournament!.courts; i++) {
 
       var player1 = standings[playerIndex].playerId;
@@ -258,17 +279,17 @@ class TournamentController extends ChangeNotifier {
       var player4 = standings[playerIndex + 3].playerId;
 
       if (tournament!.mixer) {       
-        final List<int> checked = checkPlayers(player1, player2, player3, player4, previousPairing);
+        final List<String> checked = checkPlayers(player1, player2, player3, player4, previousPairing);
         player1 = checked[0];
         player2 = checked[1];
         player3 = checked[2];
         player4 = checked[3];
       }
-
+      final id = Ulid().toString();
       TournamentGame game = TournamentGame(
-        id: i, 
+        id: id, 
         tournamentId: tournament!.id, 
-        gameNumber: round, 
+        round: round, 
         side1Player1Id: player1, 
         side1Player2Id: player2, 
         side2Player1Id: player3, 
@@ -283,12 +304,12 @@ class TournamentController extends ChangeNotifier {
     return newGames;
   }
 
-  List<List<int>> getPreviousPairing(){
+  List<List<String>> getPreviousPairing(){
     
-    final List<List<int>> arr = [];
+    final List<List<String>> arr = [];
 
     for(var game in games) {
-      if (game.gameNumber == (round-1)) {
+      if (game.round == (round-1)) {
         final item1 = [game.side1Player1Id, game.side1Player2Id];
         item1.sort();
         arr.add(item1);
@@ -301,10 +322,10 @@ class TournamentController extends ChangeNotifier {
     return arr;
   }
 
-  List<int> checkPlayers(int a, int b, int c, int d, List<List<int>> prevArray) {
+  List<String> checkPlayers(String a, String b, String c, String d, List<List<String>> prevArray) {
 
-    final List<int> ab = [a, b];
-    final List<int> cd = [c, d];
+    final List<String> ab = [a, b];
+    final List<String> cd = [c, d];
     bool needToChange = false;
 
     ab.sort();
@@ -330,10 +351,11 @@ class TournamentController extends ChangeNotifier {
     final List<TournamentGame> randomGames = [];
 
     for( var i = 0; i < tournament!.courts; i++) {
+      final id = Ulid().toString();
       TournamentGame game = TournamentGame(
-        id: i, 
+        id: id,
         tournamentId: tournament!.id, 
-        gameNumber: round,
+        round: round,
         side1Player1Id: players[playerIndex].id, 
         side1Player2Id: players[playerIndex+1].id, 
         side2Player1Id: players[playerIndex+2].id, 

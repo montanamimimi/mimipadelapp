@@ -1,5 +1,5 @@
 class TournamentStanding {
-  final int playerId;
+  final String playerId;
   final String playerName;
   int score = 0;
   int win = 0;

@@ -30,7 +30,7 @@ class LocalStorageService {
 
   // Get single tournament
 
-  Future<Tournament?> getTournament(int id) async {
+  Future<Tournament?> getTournament(String id) async {
     try {
 
       final tournament = await db.getTournament(id);
@@ -52,8 +52,10 @@ class LocalStorageService {
   // Create new tournament
 
   Future<Tournament> createTournament(Tournament tournament) async {
-    final id = await db.insertTournament(
+
+    await db.insertTournament(
       TournamentTableCompanion.insert(
+        id: tournament.id,
         name: tournament.name,
         date: tournament.date,
         courts: tournament.courts,
@@ -61,15 +63,17 @@ class LocalStorageService {
         started: false,
         finished: false,
         mixer: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       ),
     );
 
-    return tournament.copyWith(id: id);
+    return tournament;
   }
 
   // Delete games by round and tournament id
 
-  Future<void> cleanTournamentRoundGames(int id, int round) async {
+  Future<void> cleanTournamentRoundGames(String id, int round) async {
     await db.deleteGamesByRoundAndTournamentId(id, round);
   }
 
@@ -84,29 +88,34 @@ class LocalStorageService {
         started: Value(tournament.started),
         finished: Value(tournament.finished),
         mixer: Value(tournament.mixer),
+        synced: Value(tournament.synced),
+        createdAt: Value(tournament.createdAt),
+        updatedAt: Value(DateTime.now()),
       ),
     );
   }  
 
-  Future<void> deleteTournament(int id) async {
+  Future<void> deleteTournament(String id) async {
     await db.deleteTournament(id);
   }
 
-  Future<int> addPlayer(int id, String name) async {
+  Future<int> addPlayer(String id, String tid, String name) async {
+
     final playerId = await db.addPlayer(
       TournamentPlayerTableCompanion.insert(
-        tournamentId: id,
+        id: id,
+        tournamentId: tid,
         name: name,
       ),
     );
     return playerId;
   }
 
-  Future<int> removePlayer(int id) async {
+  Future<int> removePlayer(String id) async {
     return await db.removePlayer(id);
   }  
 
-  Future<List<TournamentPlayer>> getTournamentPlayersById(int id) async {
+  Future<List<TournamentPlayer>> getTournamentPlayersById(String id) async {
     final rows = await db.getTournamentPlayersById(id);
 
     return rows.map((row) => TournamentPlayer(
@@ -134,7 +143,8 @@ class LocalStorageService {
     for (var i = 0; i < items.length; i++) {
       games.add(
         TournamentGameTableCompanion(
-          gameNumber: Value(items[i].gameNumber),
+          id: Value(items[i].id),
+          round: Value(items[i].round),
           tournamentId: Value(items[i].tournamentId),
           side1Player1Id: Value(items[i].side1Player1Id),
           side1Player2Id: Value(items[i].side1Player2Id),
@@ -149,12 +159,12 @@ class LocalStorageService {
     await db.addGames(games);
   }
 
-  Future<List<TournamentGame>> getTournamentGamesById(int id) async {    
+  Future<List<TournamentGame>> getTournamentGamesById(String id) async {    
     final rows = await db.getTournamentGamesById(id);
 
     return rows.map((row) => TournamentGame(
       id: row.id,
-      gameNumber: row.gameNumber,
+      round: row.round,
       tournamentId: row.tournamentId,
       side1Player1Id: row.side1Player1Id,
       side1Player2Id: row.side1Player2Id,
@@ -165,12 +175,12 @@ class LocalStorageService {
     )).toList();
   }  
 
-  Future<List<TournamentGame>> getTournamentGamesByIdAndRound(int id, int round) async {    
+  Future<List<TournamentGame>> getTournamentGamesByIdAndRound(String id, int round) async {    
     final rows = await db.getTournamentGamesByIdAndRound(id, round);
 
     return rows.map((row) => TournamentGame(
       id: row.id,
-      gameNumber: row.gameNumber,
+      round: row.round,
       tournamentId: row.tournamentId,
       side1Player1Id: row.side1Player1Id,
       side1Player2Id: row.side1Player2Id,
@@ -181,7 +191,7 @@ class LocalStorageService {
     )).toList();
   }    
 
-  Future<void> updateGameScore(int id, int side1, int side2) async {
+  Future<void> updateGameScore(String id, int side1, int side2) async {
     await db.updateGameScore(
       id, 
       TournamentGameTableCompanion(        
@@ -191,7 +201,7 @@ class LocalStorageService {
     );
   }
 
-  Future<void> updatePlayerName(int id, String name) async {
+  Future<void> updatePlayerName(String id, String name) async {
     await db.updatePlayer(
       id, 
       TournamentPlayerTableCompanion(        
@@ -200,9 +210,4 @@ class LocalStorageService {
     );
   }
 
-  // Dev only
-
-  Future<void> cleanDatabase() async {
-    await db.cleanDatabase();
-  }
 }

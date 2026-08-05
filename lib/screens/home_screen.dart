@@ -1,16 +1,19 @@
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
 // import 'package:mimipadel/models/tournament.dart';
 import 'package:flutter/material.dart';
+import 'package:mimipadel/services/auth.dart';
 import 'package:mimipadel/widget/tournament_list.dart';
 import 'package:mimipadel/controllers/home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   
   final HomeController controller;
+  final AuthService auth;
 
   const HomeScreen({
     super.key,    
     required this.controller,
+    required this.auth,
     });
 
   @override
@@ -21,7 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _load() async {
     await widget.controller.getTournaments();
-    print(widget.controller.tournaments);
+    
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -32,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.controller.tournaments);
     return Scaffold(
         appBar: AppBar(
           title: Row(
@@ -81,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton(          
           onPressed: () async {                      
             final result = await Navigator.pushNamed(context, '/tournament', arguments: {
-                  'id': 0,
+                  'id': '',
                   'mode': TournamentScreenMode.create,
             });
             if (result == true) {                      

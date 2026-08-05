@@ -17,7 +17,7 @@ class TournamentRound extends StatelessWidget {
     final TournamentController controller;
 
     List<TournamentGame> getRoundGames() {      
-      return controller.games.where((g) => g.gameNumber == controller.round).toList();       
+      return controller.games.where((g) => g.round == controller.round).toList();       
     }
 
     @override

@@ -3,24 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:mimipadel/route/route_generator.dart';
 import 'package:mimipadel/services/auth.dart';
 import 'package:mimipadel/services/local_storage_service.dart';
+import 'package:mimipadel/services/api_service.dart';
 import 'package:mimipadel/repositories/tournament_repository.dart';
-import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async { 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  LocalStorageService? localStorageService;
-
-  if (!kIsWeb) {
-    final db = AppDatabase();
-    localStorageService = LocalStorageService(db);
-  }  
+  LocalStorageService localStorageService;
+  final AuthService auth = AuthService();
+  final ApiService api = ApiService(auth);
+  final db = AppDatabase();
+  localStorageService = LocalStorageService(db);
 
   final tournamentRepository = TournamentRepository(
-    local: localStorageService
+    local: localStorageService, 
+    api: api,
   );
 
   final authService = AuthService();

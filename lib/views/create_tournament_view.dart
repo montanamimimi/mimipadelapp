@@ -1,7 +1,5 @@
 import 'package:mimipadel/controllers/tournament_controller.dart';
-import 'package:mimipadel/repositories/tournament_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:mimipadel/models/tournament.dart';
 import 'package:intl/intl.dart';
 import 'package:mimipadel/widget/form_fields/custom_date_form_field.dart';
 import 'package:mimipadel/widget/form_fields/custom_text_form_field.dart';
@@ -10,7 +8,7 @@ import 'package:mimipadel/widget/form_fields/custom_dropdown_form_field.dart';
 class CreateTournamentView extends StatefulWidget {
 
   final TournamentController controller;
-  final ValueChanged<int> onCreate;
+  final ValueChanged<String> onCreate;
 
   const CreateTournamentView({
     super.key,
@@ -34,15 +32,12 @@ class _CreateTournamentViewState extends State<CreateTournamentView> {
 
   Future<void> addTournament() async {
 
-    final tournament = Tournament(
-      id: 0,
-      name: _nameController.text.isNotEmpty ? _nameController.text : "New tournament",
-      date: DateFormat('dd.MM.yyyy').parse(_dateController.text),
-      courts: courts ?? 0,
-      points: points ?? 0,
-    );
+    final String tname = _nameController.text.isNotEmpty ? _nameController.text : "New tournament";
+    final DateTime tdate = DateFormat('dd.MM.yyyy').parse(_dateController.text);
+    final int tcourts = courts ?? 0;
+    final int tpoints = points ?? 0;
 
-    final id = await widget.controller.create(tournament);
+    final id = await widget.controller.create(tname, tdate, tcourts, tpoints);
     
     if (!mounted) return;
 
@@ -133,7 +128,7 @@ class _CreateTournamentViewState extends State<CreateTournamentView> {
             ElevatedButton(
               onPressed: () async {
                 if (!_formKey.currentState!.validate()) return;
-
+                
                 await addTournament();                
               },
               child: Row (

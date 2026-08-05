@@ -13,7 +13,7 @@ class TournamentGameItem extends StatefulWidget {
 
     final TournamentController controller;
     final int index;
-    final int gameId;
+    final String gameId;
 
   @override
   State<TournamentGameItem> createState() => _TournamentGameItemState();
@@ -28,7 +28,7 @@ class _TournamentGameItemState extends State<TournamentGameItem> {
     late String player3;
     late String player4;
 
-    String getPlayerName(int id) {
+    String getPlayerName(String id) {
       return widget.controller.players.firstWhere((e) => e.id == id).name;
     }
 
@@ -70,9 +70,6 @@ class _TournamentGameItemState extends State<TournamentGameItem> {
                 fontSize: 14.0,
               ),              
             ),
-            // SizedBox(
-            //   height: 20.0,
-            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,

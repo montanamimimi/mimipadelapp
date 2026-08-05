@@ -19,9 +19,12 @@ class RouteGenerator {
       case '/':
         return MaterialPageRoute(builder: (_) => LoadingScreen(auth: authService));
       case '/home':
-        return MaterialPageRoute(builder: (_) => HomeScreen(controller: HomeController(repository: repository)));        
+        return MaterialPageRoute(builder: (_) => HomeScreen(
+          controller: HomeController(repository: repository),
+          auth: authService,
+          ));        
       case '/profile':
-        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+        return MaterialPageRoute(builder: (_) => ProfileScreen(auth: authService));
       case '/tournament':
         final args = settings.arguments as Map<String, dynamic>;
         final id = args['id'];

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mimipadel/services/auth.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -13,15 +13,45 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
- // final AuthService _auth = AuthService();
+  bool _isLoading = false;
+
+
+  Future<void> signInWithEmail() async {
+    setState(() {
+      _isLoading = true;
+    });                       
+
+  }
+
+  Future<void> signInAnonymously() async {
+    setState(() {
+      _isLoading = true;
+    });                       
+
+    try {
+
+      await widget.auth.signInAnon();
+
+      if (!mounted) return;
+      
+      _goToHomeScreen();
+
+    } catch (e) {
+      debugPrint('Login error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }  
 
   void _checkUser() {  
     final user = widget.auth.currentUser();
 
     if (user != null) {
       _goToHomeScreen();
-    } else {
-      print('no user');
     }
 
   }
@@ -57,16 +87,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
               width: 100.0,
               height: 100.0,
             ),
-            ElevatedButton(
-              onPressed: () async {
-                dynamic result = await widget.auth.signInAnon();
-                
-                if (result != null) {                  
-                  _goToHomeScreen();
-                }
-              }, 
-              child: Text('Sing in anon')
-            )                             
+            _isLoading
+                ? SpinKitCircle(
+                    color: Colors.lightGreen,
+                    size: 50.0,
+                  )
+                : Column(
+                  children: [
+                    Text('Create your account'),
+
+                    ElevatedButton(
+                      onPressed: signInWithEmail,
+                      child: Text('Email Login'),
+                    ),
+                    Text('Skip this step (you will lose all data if app uninstalled)'),
+                    
+                    ElevatedButton(
+                      onPressed: signInAnonymously,
+                      child: Text('Skip Login'),
+                    )                       
+                  ],
+                )
           ]
         )
       ),

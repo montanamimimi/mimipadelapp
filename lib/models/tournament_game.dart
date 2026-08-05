@@ -1,11 +1,11 @@
 class TournamentGame {
-  int id;
-  int tournamentId;
-  int gameNumber;  
-  int side1Player1Id;
-  int side1Player2Id;
-  int side2Player1Id;
-  int side2Player2Id;
+  final String id;
+  final String tournamentId;
+  final int round;  
+  String side1Player1Id;
+  String side1Player2Id;
+  String side2Player1Id;
+  String side2Player2Id;
   int side1Score;
   int side2Score;
   
@@ -13,7 +13,7 @@ class TournamentGame {
   TournamentGame({
     required this.id,
     required this.tournamentId,
-    required this.gameNumber,
+    required this.round,
     required this.side1Player1Id,
     required this.side1Player2Id,
     required this.side2Player1Id,
@@ -24,24 +24,24 @@ class TournamentGame {
 
   @override
   String toString() {
-      return 'Game id: $id, roundNumber: $gameNumber, side1Score: $side1Score, side2Score: $side2Score, p1: $side1Player1Id, p2: $side1Player2Id, p3: $side2Player1Id, p4: $side2Player2Id';
+      return 'Game id: $id, round: $round, side1Score: $side1Score, side2Score: $side2Score, p1: $side1Player1Id, p2: $side1Player2Id, p3: $side2Player1Id, p4: $side2Player2Id';
   }    
 
   TournamentGame copyWith({
-    int? id,
-    int? tournamentId,
-    int? gameNumber,
-    int? side1Player1Id,
-    int? side1Player2Id,
-    int? side2Player1Id,
-    int? side2Player2Id,
+    String? id,
+    String? tournamentId,
+    int? round,
+    String? side1Player1Id,
+    String? side1Player2Id,
+    String? side2Player1Id,
+    String? side2Player2Id,
     int? side1Score,
     int? side2Score,
   }) {
     return TournamentGame(
       id: id ?? this.id,
       tournamentId: tournamentId ?? this.tournamentId,
-      gameNumber: gameNumber ?? this.gameNumber,
+      round: round ?? this.round,
       side1Player1Id: side1Player1Id ?? this.side1Player1Id,
       side1Player2Id: side1Player2Id ?? this.side1Player2Id,
       side2Player1Id: side2Player1Id ?? this.side2Player1Id,

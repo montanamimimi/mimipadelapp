@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
 class Tournament {
-  int id;
+  final String id;
   String name;
   DateTime date;
   int courts;
@@ -9,21 +9,28 @@ class Tournament {
   bool started;
   bool finished;
   bool mixer;
+  bool synced;
+  final DateTime createdAt;
+  DateTime updatedAt;  
 
   Tournament({
     required this.id,
-    required this.name, 
+    required this.name,
     required this.date,
     this.courts = 0,
     this.points = 0,
     this.started = false,
     this.finished = false,
     this.mixer = true,
-    });
+    this.synced = false,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    }) : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   @override
   String toString() {
-    return 'Tournament(id: $id, name: $name, date: $date, courts: $courts, points: $points, mixer: $mixer, started: $started, finished: $finished)';
+    return 'Tournament(id: $id, name: $name, date: $date, mixer: $mixer, started: $started, finished: $finished, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   String getDate() {
@@ -31,7 +38,7 @@ class Tournament {
   }
 
   Tournament copyWith({
-    int? id,
+    String? id,
     String? name,
     DateTime? date,
     int? courts,
@@ -39,16 +46,19 @@ class Tournament {
     bool? started,
     bool? finished,
     bool? mixer,
+    bool? synced,
   }) {
     return Tournament(
-      id: id ?? this.id,
+      id: id ?? this.id,      
       name: name ?? this.name,
       date: date ?? this.date,
       courts: courts ?? this.courts,
       points: points ?? this.points,
-      started: started ?? this.started,      
+      started: started ?? this.started,
       finished: finished ?? this.finished,
       mixer: mixer ?? this.mixer,
+      synced: synced ?? this.synced,
     );
   } 
+
 }

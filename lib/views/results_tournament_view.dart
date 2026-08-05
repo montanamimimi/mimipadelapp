@@ -1,6 +1,5 @@
 import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:mimipadel/widget/tournament_player_result.dart';
 
 class ResultsTournamentView extends StatelessWidget {
 
@@ -17,34 +16,6 @@ class ResultsTournamentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Padding(
-    //   padding: const EdgeInsets.all(8.0),
-    //   child: Column(      
-    //     children: [
-    //       Text(controller.tournament!.getDate()),        
-    //       Expanded(
-    //         child: ListView(
-    //           children: [
-    //             // ElevatedButton(
-    //             //   onPressed: () { 
-    //             //     // print(games);
-    //             //     // print(players);
-    //             //     print(controller.tournament);
-    //             //   }, 
-    //             //   child: Text("Debug Print tournament data")
-    //             // ),
-
-    //             for (int i = 0; i < controller.standings.length; i++)                     
-    //               TournamentPlayerResult(
-    //                 place: i + 1,
-    //                 standing: controller.standings[i]
-    //               )
-    //           ],
-    //           ),
-    //       ),        
-    //     ]        
-    //   ),
-    // );
     return Column(
       children: [
         SizedBox(height: 20),
@@ -58,7 +29,7 @@ class ResultsTournamentView extends StatelessWidget {
 
               SizedBox(
                 width: 40,
-                child: Text("W-T-L", textAlign: TextAlign.end),
+                child: Text("W-L-T", textAlign: TextAlign.end),
               ),
 
               SizedBox(width: 20),
@@ -111,7 +82,7 @@ class ResultsTournamentView extends StatelessWidget {
           
                     const SizedBox(width: 20),
           
-                    // W-T-L
+                    // W-L-T
                     SizedBox(
                       width: 70,
                       child: Text(

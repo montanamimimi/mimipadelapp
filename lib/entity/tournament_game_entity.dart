@@ -1,13 +1,16 @@
 import 'package:drift/drift.dart';
 
 class TournamentGameTable extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get gameNumber => integer()();
-  IntColumn get tournamentId => integer()();
-  IntColumn get side1Player1Id => integer()();
-  IntColumn get side1Player2Id => integer()();
-  IntColumn get side2Player1Id => integer()();
-  IntColumn get side2Player2Id => integer()();
+  TextColumn get id => text()();
+  IntColumn get round => integer()();
+  TextColumn get tournamentId => text()();
+  TextColumn get side1Player1Id => text()();
+  TextColumn get side1Player2Id => text()();
+  TextColumn get side2Player1Id => text()();
+  TextColumn get side2Player2Id => text()();
   IntColumn get side1Score => integer()();
   IntColumn get side2Score => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};      
 }

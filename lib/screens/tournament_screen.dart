@@ -1,6 +1,5 @@
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
 import 'package:flutter/material.dart';
-import 'package:mimipadel/models/tournament.dart';
 import 'package:mimipadel/views/create_tournament_view.dart';
 import 'package:mimipadel/views/edit_tournament_view.dart';
 import 'package:mimipadel/views/play_tournament_view.dart';
@@ -9,7 +8,7 @@ import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:mimipadel/views/settings_tournament_view.dart';
 
 class TournamentScreen extends StatefulWidget {
-  final int tournamentId;
+  final String tournamentId;
   final TournamentController controller;
   final TournamentScreenMode mode;
 
@@ -30,7 +29,7 @@ class _TournamentScreenState extends State<TournamentScreen> {
   TournamentScreenMode mode = TournamentScreenMode.create;
   bool isLoading = true;
   
-  Future<void> _loadTournament(int? id) async { 
+  Future<void> _loadTournament(String? id) async { 
     if (id != null) {
       await controller.load(id);
     } else {

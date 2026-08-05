@@ -38,12 +38,14 @@ class _EditTournamentViewState extends State<EditTournamentView> {
     _playerFocusNode.requestFocus();
   }
 
-  Future<void> _removePlayer(int id) async {
+  Future<void> _removePlayer(String id) async {
     await widget.controller.removePlayer(id);
 
   }  
 
   Future<void> _startTournament() async {
+
+    // print(widget.controller.tournament);
     await widget.controller.startTournament();   
     widget.onStart();
   }  
@@ -55,6 +57,13 @@ class _EditTournamentViewState extends State<EditTournamentView> {
       child: ListenableBuilder(
       listenable: widget.controller, 
       builder: (context, child) {
+        final tournament = widget.controller.tournament;
+
+        if (tournament == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }        
         return Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,

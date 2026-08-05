@@ -121,12 +121,12 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                         );
                       },
                     ),
-                    // ElevatedButton(
-                    //   onPressed: () { 
-                    //     print(widget.controller.tournament);                    
-                    //   }, 
-                    //   child: Text("Debug Print tournament data")
-                    // ),
+                    ElevatedButton(
+                      onPressed: () { 
+                        print(widget.controller.tournament);                
+                      }, 
+                      child: Text("Debug Print tournament data")
+                    ),
                     if((widget.controller.round) > 0 && (widget.controller.round == widget.controller.getMaxRound())) 
                     ElevatedButton(
                       onPressed: () async { 

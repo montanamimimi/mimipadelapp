@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
     .get();
   }
 
-  Future<TournamentTableData> getTournament(int id) async {
+  Future<TournamentTableData> getTournament(String id) async {
     return await (select(tournamentTable)..where((tbl) => tbl.id.equals(id))).getSingle();
   }
 
@@ -48,15 +48,15 @@ class AppDatabase extends _$AppDatabase {
     return await into(tournamentTable).insert(entity);
   }
 
-  Future<int> deleteTournament(int id) async {
+  Future<int> deleteTournament(String id) async {
     return await (delete(tournamentTable)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Future<void> deleteGamesByRoundAndTournamentId(int id, int round) async {
+  Future<void> deleteGamesByRoundAndTournamentId(String id, int round) async {
     await (delete(tournamentGameTable)
           ..where((tbl) => 
           tbl.tournamentId.equals(id) &
-          tbl.gameNumber.equals(round)))
+          tbl.round.equals(round)))
           .go();
   }
 
@@ -64,7 +64,7 @@ class AppDatabase extends _$AppDatabase {
     return await into(tournamentPlayerTable).insert(player);
   }
 
-  Future<List<TournamentPlayerTableData>> getTournamentPlayersById(int id) async {
+  Future<List<TournamentPlayerTableData>> getTournamentPlayersById(String id) async {
     return await (select(tournamentPlayerTable)
     ..where((tbl) => tbl.tournamentId.equals(id)))
     .get();
@@ -76,7 +76,7 @@ class AppDatabase extends _$AppDatabase {
     .get();
   }
 
-  Future<int> removePlayer(int id) async {
+  Future<int> removePlayer(String id) async {
     return await (delete(tournamentPlayerTable)..where((tbl) => tbl.id.equals(id))).go();
   }
 
@@ -86,36 +86,29 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  Future<List<TournamentGameTableData>> getTournamentGamesById(int id) async {
+  Future<List<TournamentGameTableData>> getTournamentGamesById(String id) async {
     return await (select(tournamentGameTable)
     ..where((tbl) => tbl.tournamentId.equals(id)))
     .get();
   }  
 
-  Future<List<TournamentGameTableData>> getTournamentGamesByIdAndRound(int id, int round) async {
+  Future<List<TournamentGameTableData>> getTournamentGamesByIdAndRound(String id, int round) async {
     return await (select(tournamentGameTable)
-    ..where((tbl) => tbl.tournamentId.equals(id) & tbl.gameNumber.equals(round)))
+    ..where((tbl) => tbl.tournamentId.equals(id) & tbl.round.equals(round)))
     .get();
   }
 
-  Future<void> updateGameScore(int id, TournamentGameTableCompanion entity) async {
+  Future<void> updateGameScore(String id, TournamentGameTableCompanion entity) async {
     await (update(tournamentGameTable)
       ..where((tbl) => tbl.id.equals(id)))
       .write(entity);
   }  
 
 
-  Future<void> updatePlayer(int id, TournamentPlayerTableCompanion entity) async {
+  Future<void> updatePlayer(String id, TournamentPlayerTableCompanion entity) async {
     await (update(tournamentPlayerTable)
       ..where((tbl) => tbl.id.equals(id)))
       .write(entity);
   }    
 
-  // DEV only 
-
-  Future<void> cleanDatabase() async {
-    await (delete(tournamentTable)..where((tbl) => tbl.id.isBiggerOrEqualValue(0))).go();
-    await (delete(tournamentPlayerTable)..where((tbl) => tbl.id.isBiggerOrEqualValue(0))).go();
-    await (delete(tournamentGameTable)..where((tbl) => tbl.id.isBiggerOrEqualValue(0))).go();
-  }
 }
