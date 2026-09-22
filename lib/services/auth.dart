@@ -10,7 +10,7 @@ class AuthService {
 
   // sign in anon 
 
-  Future signInAnon() async {
+  Future<MimiUser?> signInAnon() async {
     try {
       await _auth.signInAnonymously();
       
@@ -20,6 +20,40 @@ class AuthService {
 
     } on FirebaseAuthException catch(e) {
       print(e.code);
+      return null;
+    }
+  }
+
+  Future<MimiUser?> signUpWithEmail(String email, String password) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final MimiUser? user = await syncUser();
+
+      return user;
+
+    } catch(e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<MimiUser?> signInWithEmail(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final MimiUser? user = await syncUser();
+
+      return user;
+
+    } catch(e) {
+      print(e.toString());
       return null;
     }
   }
@@ -48,9 +82,7 @@ class AuthService {
   }  
 
   Future<MimiUser?> syncUser() async {
-      final idToken = await getIdToken();  
-
-      print(idToken);
+      final idToken = await getIdToken();
 
       if (idToken == null) {
         return null;

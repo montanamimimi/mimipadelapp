@@ -1,15 +1,19 @@
+import 'package:mimipadel/controllers/players_controller.dart';
 import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:mimipadel/widget/form_fields/custom_text_form_field.dart';
+import 'package:mimipadel/models/player.dart';
+import 'package:mimipadel/widget/form_fields/player_name_form_field.dart';
 
 class EditTournamentView extends StatefulWidget {
 
   final TournamentController controller;
+  final PlayersController playersController;
   final VoidCallback onStart;
 
   const EditTournamentView({
     super.key,
     required this.controller,
+    required this.playersController,
     required this.onStart,
   });
 
@@ -19,35 +23,64 @@ class EditTournamentView extends StatefulWidget {
 
 class _EditTournamentViewState extends State<EditTournamentView> {
   
-  final _formKey = GlobalKey<FormState>();
-  final _playerFocusNode = FocusNode();
-  final TextEditingController _playerController = TextEditingController();
-
+  // final _formKey = GlobalKey<FormState>();
+  // final _playerFocusNode = FocusNode();
+  // final TextEditingController _playerController = TextEditingController();
+  TextEditingController? _playerTextController;
+  late PlayersController playersController;
 
   @override
   void dispose() {
-    _playerFocusNode.dispose();
-    _playerController.dispose();
+    // _playerFocusNode.dispose();
+    playersController.dispose();
     super.dispose();
   }
 
-  Future<void> _addPlayer() async {    
-    if (!_formKey.currentState!.validate()) return;
-    await widget.controller.addPlayer(_playerController.text);
-    _playerController.clear();
-    _playerFocusNode.requestFocus();
+  Future<void> _addTournamentPlayer(Player? player) async {    
+
+    String playerId;
+
+    if (_playerTextController == null || _playerTextController!.text.isEmpty) {
+      print('Empty!');
+      return;
+    }
+
+    if (player == null) {
+      playerId = await widget.playersController.addPlayer(_playerTextController!.text);      
+    } else {
+      playerId = player.id;
+    }
+
+    // if (!_formKey.currentState!.validate()) return;
+    await widget.controller.addTournamentPlayer(_playerTextController!.text, playerId);
+    // _playerController.clear();
+    // _playerFocusNode.requestFocus();
+
+    _playerTextController?.clear();
   }
 
-  Future<void> _removePlayer(String id) async {
-    await widget.controller.removePlayer(id);
+  Future<void> _removeTournamentPlayer(String id) async {
+    await widget.controller.removeTournamentPlayer(id);
 
   }  
 
-  Future<void> _startTournament() async {
-
-    // print(widget.controller.tournament);
+  Future<void> _startTournament() async {    
     await widget.controller.startTournament();   
     widget.onStart();
+  }  
+
+  Future<void> _load() async {
+    await widget.playersController.getPlayers();
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }  
+
+  @override
+  void initState() {
+    super.initState();   
+    _load();
   }  
 
   @override 
@@ -85,20 +118,66 @@ class _EditTournamentViewState extends State<EditTournamentView> {
             ),      
             if (!widget.controller.gameReady)      
             Form(
-              key: _formKey,
+              // key: _formKey,
               child: Row(
                 children: [
-                  Expanded(child: CustomTextFormField(
-                    controller: _playerController, 
-                    label: 'Name',
-                    required: true,
-                    callback: _addPlayer,
-                    focusNode: _playerFocusNode,
-                  )),
+                  // Expanded(child: PlayerNameFormField(
+                  //   controller: _playerController, 
+                  //   label: 'Name',
+                  //   required: true,
+                  //   callback: _addTournamentPlayer,
+                  //   focusNode: _playerFocusNode,
+                  // )),
+                  // IconButton(
+                  //   onPressed: _addTournamentPlayer,
+                  //   icon: Icon(Icons.add)
+                  // )
+                  Expanded(
+                    child: Autocomplete<Player>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return const Iterable<Player>.empty();
+                        }
+
+                        return widget.playersController.players.where((player) {
+                          return player.name.toLowerCase().contains(
+                            textEditingValue.text.toLowerCase(),
+                          );  
+                        });
+                      },
+
+                      displayStringForOption: (player) => player.name,
+
+                      onSelected: (Player player) async {
+                        // print('Selected: $player');
+                        // print(_playerTextController);
+                        await _addTournamentPlayer(player);                                        
+                      },
+
+                      fieldViewBuilder: (
+                        BuildContext context,
+                        TextEditingController textController,
+                        FocusNode focusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        _playerTextController = textController;
+                        return TextFormField(
+                          controller: textController,
+                          focusNode: focusNode,
+                          decoration: const InputDecoration(
+                            labelText: 'Player name',
+                            hintText: 'Start typing...',
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   IconButton(
-                    onPressed: _addPlayer,
+                    onPressed: () {
+                      _addTournamentPlayer(null);
+                    },
                     icon: Icon(Icons.add)
-                  )
+                  )                  
                 ]
               ),
             ),  
@@ -134,7 +213,7 @@ class _EditTournamentViewState extends State<EditTournamentView> {
                           Text(player.name),
                           IconButton(
                             onPressed: () {
-                              _removePlayer(player.id);
+                              _removeTournamentPlayer(player.id);
                             },
                             icon: Icon(Icons.remove)
                           )
@@ -149,6 +228,7 @@ class _EditTournamentViewState extends State<EditTournamentView> {
       
           ],           
         );
+        
       }
       )  
     );

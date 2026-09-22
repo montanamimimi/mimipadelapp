@@ -1,3 +1,6 @@
+import 'package:mimipadel/logic/round_generator.dart';
+import 'package:mimipadel/models/player.dart';
+import 'package:mimipadel/models/tournament_format.dart';
 import 'package:mimipadel/models/tournament_player.dart';
 import 'package:mimipadel/repositories/tournament_repository.dart';
 import 'package:mimipadel/models/tournament.dart';
@@ -19,6 +22,7 @@ class TournamentController extends ChangeNotifier {
   bool gameReady = false; 
   int round = 0;
   bool roundReady = false;
+  RoundGenerator generator = RoundGenerator();
 
   Future<void> load(String id) async {
     tournament = await repository.getTournamentById(id);
@@ -57,8 +61,14 @@ class TournamentController extends ChangeNotifier {
     await repository.updateTournament(tournament!);
   }  
 
-  Future<void> updatePlayerName(String id, String name) async {
-    await repository.updatePlayerName(id, name);
+  Future<void> updatePointsToPlay(int points) async {
+    tournament = tournament!.copyWith(points: points);    
+    notifyListeners();
+    await repository.updateTournament(tournament!);
+  } 
+
+  Future<void> updateTournamentPlayerName(String id, String name) async {
+    await repository.updateTournamentPlayerName(id, name);
 
     final index = players.indexWhere((p) => p.id == id);
     if (index != -1) {
@@ -68,18 +78,17 @@ class TournamentController extends ChangeNotifier {
     notifyListeners();
   }  
 
-  Future<String> create(String name, DateTime date, int courts, int points) async {
-    final id = Ulid().toString();
-
-    print(id);
+  Future<String> create(String name, DateTime date, int courts, int points, TournamentFormat format) async {
+    final id = Ulid().toString();    
 
     await repository.createTournament(
       Tournament(
         id: id,
         name: name,
         date: date,
+        format: format.name,
         courts: courts,
-        points: points,      
+        points: points,
       )
     );
 
@@ -90,32 +99,46 @@ class TournamentController extends ChangeNotifier {
     await repository.deleteTournament(tournament!.id);
   }
 
-  Future<void> addPlayer(String name) async {
+  Future<void> addTournamentPlayer(String name, String playerId) async {
+
+    // !!! 
+
     final id = Ulid().toString();
-    await repository.addPlayer(id, tournament!.id, name);
+    await repository.addTournamentPlayer(id, tournament!.id, name, playerId);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
     notifyListeners();
   }
 
-  Future<void> removePlayer(String id) async {
-    await repository.removePlayer(id);
+  Future<void> removeTournamentPlayer(String id) async {
+    await repository.removeTournamentPlayer(id, tournament!.id);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
     notifyListeners();
   }
 
   Future<void> startTournament() async {
+
     tournament!.started = true;
+    List<TournamentGame> newGames = [];
+
     await update();
 
     if (games.isEmpty) {
-      final newGames = generateRandomGames();
-      await repository.insertTournamentGames(newGames);
-      games = await repository.getTournamentGamesById(tournament!.id);
-    }
 
-    roundReady = false;
+      if (tournament!.format == 'americano') {
+        newGames = generator.generateAmericanoRounds(players: players, id: tournament!.id);
+        roundReady = true;
+      } else {
+        newGames = generateRandomGames();
+        roundReady = false;
+      }
+      
+      await repository.insertTournamentGames(newGames, tournament!.id);
+      games = await repository.getTournamentGamesById(tournament!.id);
+      
+    }
+ 
   }
 
   // Manage games
@@ -128,7 +151,7 @@ class TournamentController extends ChangeNotifier {
       }
     }
     
-    await repository.updateGameScore(id, side1, side2);
+    await repository.updateGameScore(id, side1, side2, tournament!.id);
     calculateStandings();
     checkRoundReady(); 
   }
@@ -139,16 +162,29 @@ class TournamentController extends ChangeNotifier {
 
     if (tournament != null) {      
 
-      bool gameReady = true;      
+      if (tournament!.format == 'americano') {
 
-      for (final game in games) {
-        if (game.round == round) {
-          if ((game.side1Score + game.side2Score) != tournament!.points) {
-            gameReady = false;
+        final maxRound = getMaxRound();
+
+        if (round == maxRound) {
+          roundReady = false;
+        } else {
+          roundReady = true;
+        }
+        
+      } else {
+        bool gameReady = true;
+
+        for (final game in games) {
+          if (game.round == round) {
+            if ((game.side1Score + game.side2Score) == 0) {
+              gameReady = false;
+            }
           }
         }
+        roundReady = gameReady;
       }
-      roundReady = gameReady;    
+          
     }
 
     notifyListeners();
@@ -159,23 +195,23 @@ class TournamentController extends ChangeNotifier {
   Future<void> shuffleRound() async {
     final newGames = generateRandomGames();
     await repository.cleanTournamentRoundGames(tournament!.id, round);
-    await repository.insertTournamentGames(newGames);
+    await repository.insertTournamentGames(newGames, tournament!.id);
     games = await repository.getTournamentGamesById(tournament!.id);
   }
 
-  // Recalculate round results based on games
+  // Recalculate round results based on games MEXICANO only
 
   Future<void> recalculateRound() async {
     await repository.cleanTournamentRoundGames(tournament!.id, round);
     games = await repository.getTournamentGamesById(tournament!.id);    
-    final newGames = generateRoundGames();    
-    await repository.insertTournamentGames(newGames);
+    final newGames = generateMexicanoRoundGames();    
+    await repository.insertTournamentGames(newGames, tournament!.id);
     games = await repository.getTournamentGamesById(tournament!.id);
   }
 
   int getMaxRound() {
 
-    if (games.length > 0) {
+    if (games.isNotEmpty) {
       return games
           .map((g) => g.round)
           .reduce((a, b) => a > b ? a : b);
@@ -187,15 +223,20 @@ class TournamentController extends ChangeNotifier {
 
   Future<void> nextRound() async {
     round = round + 1;
+    
     notifyListeners();
 
-    final maxRound = getMaxRound();
+    if (tournament!.format == 'mexicano') {
+      final maxRound = getMaxRound();
 
-    if (round > maxRound) {
-      final newGames = generateRoundGames();
-      await repository.insertTournamentGames(newGames);     
-      games = await repository.getTournamentGamesById(tournament!.id);
+      if (round > maxRound) {
+        final newGames = generateMexicanoRoundGames();
+        await repository.insertTournamentGames(newGames, tournament!.id);     
+        games = await repository.getTournamentGamesById(tournament!.id);      
+      }
+
     }
+
     checkRoundReady();
   }
 
@@ -264,7 +305,7 @@ class TournamentController extends ChangeNotifier {
     });
   }    
 
-  List<TournamentGame> generateRoundGames() {
+  List<TournamentGame> generateMexicanoRoundGames() {
     calculateStandings();   
 
     final List<TournamentGame> newGames = [];
@@ -373,4 +414,5 @@ class TournamentController extends ChangeNotifier {
   void checkReady() {
     gameReady = players.length >= tournament!.courts*4;
   }
+ 
 }

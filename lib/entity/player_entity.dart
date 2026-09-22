@@ -1,9 +1,8 @@
 import 'package:drift/drift.dart';
 
-class TournamentPlayerTable extends Table {
+class PlayerTable extends Table {
   TextColumn get id => text()();
-  TextColumn get playerId => text()();
-  TextColumn get tournamentId => text()();
+  TextColumn get userId => text()();
   TextColumn get name => text().withLength(min: 1, max: 32)();
 
   @override

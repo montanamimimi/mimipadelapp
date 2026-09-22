@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
 import 'package:mimipadel/models/tournament.dart';
+import 'package:mimipadel/models/tournament_format.dart';
 
 class TournamentItem extends StatelessWidget {
 
@@ -26,12 +27,13 @@ class TournamentItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),      
       child: InkWell(
-        onTap: () async {   
+        onTap: () async {             
             
           if (tournament.started) {
             final result1 = await Navigator.pushNamed(context, '/tournament', arguments: {
               'id': tournament.id,
               'mode': TournamentScreenMode.play,
+              'format': TournamentFormat.values.byName(tournament.format),
             });
 
 
@@ -42,6 +44,7 @@ class TournamentItem extends StatelessWidget {
             final result2 = await  Navigator.pushNamed(context, '/tournament', arguments: {
               'id': tournament.id,
               'mode': TournamentScreenMode.edit,
+              'format': TournamentFormat.values.byName(tournament.format),
             }); 
 
             if (result2 == true) {                      
@@ -61,6 +64,7 @@ class TournamentItem extends StatelessWidget {
               )
             ),
             Text(tournament.getDate()),
+            Text('Format:  ${tournament.format}'),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [                                

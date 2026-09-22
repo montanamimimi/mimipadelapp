@@ -13,6 +13,15 @@ class HomeController extends ChangeNotifier {
 
   Future<void> getTournaments() async {    
     tournaments = await repository.getTournaments();
+
+    // print('TOURNAMENT ROWS: ${tournaments.length}');
+    // print('TOURNAMENT ROWS: $tournaments');
+
     notifyListeners();
   }
+
+
+  Future<void> deleteLocalData() async {
+    await repository.deleteLocalData();
+  }      
 }

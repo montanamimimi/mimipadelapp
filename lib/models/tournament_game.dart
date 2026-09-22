@@ -50,4 +50,20 @@ class TournamentGame {
       side2Score: side2Score ?? this.side2Score,
     );
   } 
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id' : id,
+      'tournament_id': tournamentId,
+      'round': round,
+      'side1_player1_id': side1Player1Id,
+      'side1_player2_id': side1Player2Id,
+      'side2_player1_id': side2Player1Id,
+      'side2_player2_id': side2Player2Id,
+      'side_1_score': side1Score,
+      'side_2_score' : side2Score,
+    };
+  }  
+
 }

@@ -5,6 +5,7 @@ import 'package:mimipadel/services/auth.dart';
 import 'package:mimipadel/services/local_storage_service.dart';
 import 'package:mimipadel/services/api_service.dart';
 import 'package:mimipadel/repositories/tournament_repository.dart';
+import 'package:mimipadel/repositories/players_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async { 
@@ -22,10 +23,16 @@ void main() async {
     api: api,
   );
 
+  final playersRepository = PlayersRepository(
+    local: localStorageService, 
+    api: api,
+  );  
+
   final authService = AuthService();
 
   runApp(MyApp(
     tournamentRepository: tournamentRepository,
+    playersRepository: playersRepository,
     authService: authService,
   ));
 }
@@ -34,13 +41,15 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key, 
     required this.tournamentRepository,
+    required this.playersRepository,
     required this.authService,
     });
 
+  final PlayersRepository playersRepository;
   final TournamentRepository tournamentRepository;
   final AuthService authService;
 
-  // This widget is the root of your application.
+  // Application root
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -53,7 +62,8 @@ class MyApp extends StatelessWidget {
           RouteGenerator.generateRoute(
             settings,
             tournamentRepository,
-            authService,
+            playersRepository,
+            authService,            
           ),
     );
   }

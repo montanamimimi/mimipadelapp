@@ -4,6 +4,7 @@ class Tournament {
   final String id;
   String name;
   DateTime date;
+  String format;
   int courts;
   int points;
   bool started;
@@ -17,6 +18,7 @@ class Tournament {
     required this.id,
     required this.name,
     required this.date,
+    required this.format,
     this.courts = 0,
     this.points = 0,
     this.started = false,
@@ -30,7 +32,7 @@ class Tournament {
 
   @override
   String toString() {
-    return 'Tournament(id: $id, name: $name, date: $date, mixer: $mixer, started: $started, finished: $finished, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Tournament(id: $id, name: $name, format: $format, mixer: $mixer, started: $started, finished: $finished)';
   }
 
   String getDate() {
@@ -41,6 +43,7 @@ class Tournament {
     String? id,
     String? name,
     DateTime? date,
+    String? format,
     int? courts,
     int? points,
     bool? started,
@@ -52,6 +55,7 @@ class Tournament {
       id: id ?? this.id,      
       name: name ?? this.name,
       date: date ?? this.date,
+      format: format ?? this.format,
       courts: courts ?? this.courts,
       points: points ?? this.points,
       started: started ?? this.started,

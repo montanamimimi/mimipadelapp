@@ -1,0 +1,4 @@
+enum TournamentFormat {
+  mexicano,
+  americano,
+}

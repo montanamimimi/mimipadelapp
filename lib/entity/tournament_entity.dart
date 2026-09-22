@@ -6,6 +6,7 @@ class TournamentTable extends Table {
   IntColumn get courts => integer()();
   IntColumn get points => integer()();
   DateTimeColumn get date => dateTime()();
+  TextColumn get format => text()();
   BoolColumn get started => boolean()();
   BoolColumn get finished => boolean()();
   BoolColumn get mixer => boolean()();

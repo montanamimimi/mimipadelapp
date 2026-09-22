@@ -15,7 +15,7 @@ class MimiUser {
 
   @override
   String toString() {
-      return 'User instance firebase_uid $firebaseUid';
+      return 'User instance, id $id, firebase_uid $firebaseUid, email $email, name $name';
   }
 
   factory MimiUser.fromJson(Map<String, dynamic> json) {

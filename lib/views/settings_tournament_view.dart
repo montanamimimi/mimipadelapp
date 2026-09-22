@@ -2,6 +2,7 @@ import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:mimipadel/widget/dialogs/text_input_dialog.dart';
 import 'package:mimipadel/widget/dialogs/confirm_dialog.dart';
+import 'package:mimipadel/widget/dialogs/check_option_dialog.dart';
 
 class SettingsTournamentView extends StatefulWidget {
 
@@ -59,9 +60,22 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                   )
                 ],
               ),
-              
-              Text("Date: ${widget.controller.tournament!.getDate()}"),
-              Text("Courts to play: ${widget.controller.tournament!.courts}"),
+              Row(
+                children: [
+                  Text("Format: ${widget.controller.tournament!.format}"),
+                ]
+              ),
+              Row(
+                children: [
+                  Text("Date: ${widget.controller.tournament!.getDate()}"),
+                ]
+              ),
+              Row(
+                children: [
+                  Text("Courts to play: ${widget.controller.tournament!.courts}"),
+                ]
+              ),
+              if (widget.controller.tournament!.format == 'mexicano') 
               Row(
                 children: [
                   const Text("Should we MAX MIX players?"),
@@ -75,8 +89,36 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                 children: [
                   Text("Points to play: ${widget.controller.tournament!.points.toString()}"),
                   IconButton(
-                    onPressed: () {
-                      // EDIT POINTS TO PLAY HERE
+                    onPressed: () async {
+                      
+                      final points = await showCheckOptionDialog(
+                        context: context,
+                        title: 'Points to play',
+                        options: [
+                          CheckOption(
+                            key: '16',
+                            value: '16',
+                          ),
+                          CheckOption(
+                            key: '21',
+                            value: '21',
+                          ),         
+                          CheckOption(
+                            key: '24',
+                            value: '24',
+                          ),
+                          CheckOption(
+                            key: '32',
+                            value: '32',
+                          ),                                   
+              ],
+                      );
+
+                      if (points != null && points.isNotEmpty) {
+                        final number = int.parse(points);
+                        widget.controller.updatePointsToPlay(number);                       
+                      }
+
                     }, 
                     icon: Icon(
                       Icons.edit
@@ -104,7 +146,7 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                                 );
 
                                 if (name != null && name.isNotEmpty) {
-                                  widget.controller.updatePlayerName(entry.value.id, name);                       
+                                  widget.controller.updateTournamentPlayerName(entry.value.id, name);                       
                                 }   
                               }, 
                               icon: Icon(
@@ -121,13 +163,19 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                         );
                       },
                     ),
-                    ElevatedButton(
-                      onPressed: () { 
-                        print(widget.controller.tournament);                
-                      }, 
-                      child: Text("Debug Print tournament data")
-                    ),
-                    if((widget.controller.round) > 0 && (widget.controller.round == widget.controller.getMaxRound())) 
+                    // ElevatedButton(
+                    //   onPressed: () { 
+                    //     print(widget.controller.tournament);                
+                    //   }, 
+                    //   child: Text("Debug Print tournament data")
+                    // ),
+                    if(
+                      (widget.controller.round) > 0 
+                      && 
+                      (widget.controller.round == widget.controller.getMaxRound())
+                      &&
+                      (widget.controller.tournament!.format != 'americano')
+                      ) 
                     ElevatedButton(
                       onPressed: () async { 
                         await widget.controller.recalculateRound();
@@ -138,7 +186,13 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                       },
                       child: Text("Recalculate round results")
                     ),                      
-                    if (widget.controller.tournament!.started && (widget.controller.round == widget.controller.getMaxRound()))
+                    if (
+                      widget.controller.tournament!.started 
+                      && 
+                      (widget.controller.round == widget.controller.getMaxRound())
+                      && 
+                      (widget.controller.tournament!.format != 'americano')
+                      )
                     ElevatedButton(
                       onPressed: () async { 
                         final result = await showConfirmDialog(

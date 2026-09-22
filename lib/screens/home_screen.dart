@@ -1,9 +1,12 @@
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
 // import 'package:mimipadel/models/tournament.dart';
 import 'package:flutter/material.dart';
+import 'package:mimipadel/models/tournament_format.dart';
 import 'package:mimipadel/services/auth.dart';
 import 'package:mimipadel/widget/tournament_list.dart';
 import 'package:mimipadel/controllers/home_controller.dart';
+import 'package:mimipadel/widget/dialogs/check_option_dialog.dart';
+import 'package:mimipadel/widget/dialogs/confirm_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   
@@ -77,21 +80,62 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 ),
                 SizedBox(
-                  height: 100.0
+                  height: 20.0
                 ),
+                // ElevatedButton(
+                //   onPressed: () async {
+
+                //     final result = await showConfirmDialog(
+                //       context: context,
+                //       title: 'Delete local data?',                         
+                //       hintText: 'You can not undo it',
+                //       confirmButtonText: 'CLEAN IT!'
+                //     );       
+                    
+                //     if (result == "sure") {
+                //       await widget.controller.deleteLocalData();
+                //     }                        
+                    
+                //   }, 
+                //   child: Text('Delete Local Data')
+                // )                     
               ]
             ),
           ),
         ),
         floatingActionButton: FloatingActionButton(          
-          onPressed: () async {                      
-            final result = await Navigator.pushNamed(context, '/tournament', arguments: {
-                  'id': '',
-                  'mode': TournamentScreenMode.create,
-            });
-            if (result == true) {                      
-              _load();
-            }
+          onPressed: () async {        
+
+            final format = await showCheckOptionDialog(
+              context: context,
+              title: 'Choose Format',
+              options: [
+                CheckOption(
+                  key: TournamentFormat.mexicano,
+                  value: 'Mexicano',
+                ),
+                CheckOption(
+                  key: TournamentFormat.americano,
+                  value: 'Americano',
+                ),              
+              ],
+            );
+
+            
+            if (!context.mounted) return;
+
+            if (format != null) {              
+              
+              final result = await Navigator.pushNamed(context, '/tournament', arguments: {
+                    'id': '',
+                    'format' : format,
+                    'mode': TournamentScreenMode.create,
+              });
+
+              if (result == true) {                      
+                _load();
+              }                   
+            }                              
           },
           child: Icon(
             Icons.add,
@@ -115,7 +159,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/profile');
                 }
-              )
+              ),
+              ListTile(
+                leading: Icon (
+                  Icons.person
+                ),
+                title: Text("Players"),
+                onTap: () {                 
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/players');
+                }
+              )              
             ],
           )
         )

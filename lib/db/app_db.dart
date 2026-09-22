@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:mimipadel/entity/tournament_entity.dart';
 import 'package:mimipadel/entity/tournament_game_entity.dart';
 import 'package:mimipadel/entity/tournament_player_entity.dart';
+import 'package:mimipadel/entity/player_entity.dart';
 
 part 'app_db.g.dart';
 
@@ -21,7 +22,7 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [TournamentTable, TournamentPlayerTable, TournamentGameTable])
+@DriftDatabase(tables: [TournamentTable, TournamentPlayerTable, TournamentGameTable, PlayerTable])
 
 class AppDatabase extends _$AppDatabase {
   
@@ -60,7 +61,7 @@ class AppDatabase extends _$AppDatabase {
           .go();
   }
 
-  Future<int> addPlayer(TournamentPlayerTableCompanion player) async {
+  Future<int> addTournamentPlayer(TournamentPlayerTableCompanion player) async {
     return await into(tournamentPlayerTable).insert(player);
   }
 
@@ -76,9 +77,15 @@ class AppDatabase extends _$AppDatabase {
     .get();
   }
 
-  Future<int> removePlayer(String id) async {
+  Future<int> removeTournamentPlayer(String id) async {
     return await (delete(tournamentPlayerTable)..where((tbl) => tbl.id.equals(id))).go();
   }
+
+  Future<void> updateTournamentPlayer(String id, TournamentPlayerTableCompanion entity) async {
+    await (update(tournamentPlayerTable)
+      ..where((tbl) => tbl.id.equals(id)))
+      .write(entity);
+  }  
 
   Future<void> addGames(List<TournamentGameTableCompanion> items) async {
     await batch((batch) {
@@ -104,11 +111,25 @@ class AppDatabase extends _$AppDatabase {
       .write(entity);
   }  
 
+  Future<List<PlayerTableData>> getPlayers() async {
+    return await (select(playerTable)
+    ..orderBy([(t) => OrderingTerm.desc(t.name)]))
+    .get();
+  }
 
-  Future<void> updatePlayer(String id, TournamentPlayerTableCompanion entity) async {
-    await (update(tournamentPlayerTable)
-      ..where((tbl) => tbl.id.equals(id)))
-      .write(entity);
+  Future<int> addPlayer(PlayerTableCompanion player) async {
+    return await into(playerTable).insert(player);
   }    
+
+  Future<void> deletePlayers() async {
+    await delete(playerTable).go();
+  }  
+
+  Future<void> deleteAllTables() async {
+    await delete(playerTable).go();
+    await delete(tournamentTable).go();
+    await delete(tournamentPlayerTable).go();
+    await delete(tournamentGameTable).go();
+  }
 
 }

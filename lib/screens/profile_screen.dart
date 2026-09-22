@@ -57,22 +57,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundImage: AssetImage('assets/images/person.jpg'),
                     radius: 50.0,
                   ),         
-                  Text('User id ${user!.uid}'),  
-                  ElevatedButton(
-                    onPressed: () async {
-                      final user = await widget.auth.syncUser();
-                      print(user);
-                    }, 
-                    child: Text('test Me')
-                  ),                                  
+                  // Text('User id ${user!.uid}'),  
+                  // ElevatedButton(
+                  //   onPressed: () async {
+                  //     final user = await widget.auth.syncUser();
+                  //     print(user);
+                  //   }, 
+                  //   child: Text('test Me')
+                  // ),                                  
                   ElevatedButton(
                     onPressed: () async {
                       await widget.auth.signOut();
                       if (!context.mounted) return;
-                      Navigator.pushReplacementNamed(context, '/');                             
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);                             
                     }, 
                     child: Text('Sign Out')
-                  )
+                  )              
               ],),
           ),
         ),

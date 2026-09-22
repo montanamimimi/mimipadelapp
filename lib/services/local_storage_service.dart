@@ -3,6 +3,7 @@ import 'package:mimipadel/models/tournament.dart';
 import 'package:drift/drift.dart';
 import 'package:mimipadel/models/tournament_player.dart';
 import 'package:mimipadel/models/tournament_game.dart';
+import 'package:mimipadel/models/player.dart';
 
 class LocalStorageService {
 
@@ -20,6 +21,7 @@ class LocalStorageService {
       id: row.id,
       name: row.name,
       courts: row.courts,
+      format: row.format,
       date: row.date,
       started: row.started,
       finished: row.finished,
@@ -27,6 +29,17 @@ class LocalStorageService {
       mixer: row.mixer,
     )).toList();
   }
+
+  Future<List<Player>> getPlayers() async {    
+
+    final rows = await db.getPlayers();
+
+    return rows.map((row) => Player(
+      id: row.id,
+      userId: '',
+      name: row.name,
+    )).toList();
+  }  
 
   // Get single tournament
 
@@ -38,6 +51,7 @@ class LocalStorageService {
         id: id,
         name: tournament.name,
         date: tournament.date,
+        format: tournament.format,
         courts: tournament.courts,
         points: tournament.points,
         started: tournament.started,
@@ -58,6 +72,7 @@ class LocalStorageService {
         id: tournament.id,
         name: tournament.name,
         date: tournament.date,
+        format: tournament.format,
         courts: tournament.courts,
         points: tournament.points,
         started: false,
@@ -83,6 +98,7 @@ class LocalStorageService {
         id: Value(tournament.id),
         name: Value(tournament.name),
         date: Value(tournament.date),
+        format: Value(tournament.format),
         courts: Value(tournament.courts),
         points: Value(tournament.points),
         started: Value(tournament.started),
@@ -99,11 +115,12 @@ class LocalStorageService {
     await db.deleteTournament(id);
   }
 
-  Future<int> addPlayer(String id, String tid, String name) async {
+  Future<int> addTournamentPlayer(String id, String tid, String name, String pid) async {
 
-    final playerId = await db.addPlayer(
+    final playerId = await db.addTournamentPlayer(
       TournamentPlayerTableCompanion.insert(
         id: id,
+        playerId: pid,
         tournamentId: tid,
         name: name,
       ),
@@ -111,8 +128,8 @@ class LocalStorageService {
     return playerId;
   }
 
-  Future<int> removePlayer(String id) async {
-    return await db.removePlayer(id);
+  Future<int> removeTournamentPlayer(String id) async {
+    return await db.removeTournamentPlayer(id);
   }  
 
   Future<List<TournamentPlayer>> getTournamentPlayersById(String id) async {
@@ -201,13 +218,32 @@ class LocalStorageService {
     );
   }
 
-  Future<void> updatePlayerName(String id, String name) async {
-    await db.updatePlayer(
+  Future<void> updateTournamentPlayerName(String id, String name) async {
+    await db.updateTournamentPlayer(
       id, 
       TournamentPlayerTableCompanion(        
         name: Value(name)       
       )
     );
   }
+
+  Future<void> addPlayer(String id, String name) async {
+
+    await db.addPlayer(
+      PlayerTableCompanion.insert(
+        id: id,
+        userId: '',        
+        name: name,
+      ),
+    );    
+  }  
+
+  Future<void> cleanPlayers() async {
+    await db.deletePlayers();
+  }
+
+  Future<void> cleanAllData() async {
+    await db.deleteAllTables();
+  }    
 
 }

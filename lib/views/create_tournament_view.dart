@@ -1,6 +1,7 @@
 import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mimipadel/models/tournament_format.dart';
 import 'package:mimipadel/widget/form_fields/custom_date_form_field.dart';
 import 'package:mimipadel/widget/form_fields/custom_text_form_field.dart';
 import 'package:mimipadel/widget/form_fields/custom_dropdown_form_field.dart';
@@ -9,11 +10,13 @@ class CreateTournamentView extends StatefulWidget {
 
   final TournamentController controller;
   final ValueChanged<String> onCreate;
+  final TournamentFormat format;
 
   const CreateTournamentView({
     super.key,
     required this.controller,
     required this.onCreate,
+    required this.format,
   });
 
   @override
@@ -37,7 +40,7 @@ class _CreateTournamentViewState extends State<CreateTournamentView> {
     final int tcourts = courts ?? 0;
     final int tpoints = points ?? 0;
 
-    final id = await widget.controller.create(tname, tdate, tcourts, tpoints);
+    final id = await widget.controller.create(tname, tdate, tcourts, tpoints, widget.format);
     
     if (!mounted) return;
 
@@ -108,7 +111,7 @@ class _CreateTournamentViewState extends State<CreateTournamentView> {
             Text("How many courts to play?"),
             CustomDropdownFormField(
               label: "Courts to play",
-              items: [1, 2, 3, 4, 5, 6, 7, 8],
+              items: [1, 2, 3, 4, 5, 6, 7],
               onChanged: (value) {
                 setState(() {
                   courts = value!;
