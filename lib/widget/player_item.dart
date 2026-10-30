@@ -5,11 +5,13 @@ class PlayerItem extends StatelessWidget {
     const PlayerItem({
       super.key, 
       required this.name,
+      required this.id,
       required this.rating,
     });
 
     final String name;
     final int rating;
+    final String id;
 
     @override
     Widget build(BuildContext context) {          
@@ -27,6 +29,7 @@ class PlayerItem extends StatelessWidget {
                   fontSize: 18.0,
                 )
               ),
+              Text(id),
               Text(
                 rating.toString()
               ),

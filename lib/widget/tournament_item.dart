@@ -12,20 +12,28 @@ class TournamentItem extends StatelessWidget {
   });
 
   final Tournament tournament;
-  final VoidCallback callback;
+  final VoidCallback callback;  
+
+  BoxDecoration getTournamentDecoration(Tournament tournament) {
+    return BoxDecoration(
+      color: tournament.finished
+          ? Colors.white
+          : const Color.fromARGB(255, 222, 255, 228),
+      border: Border.all(
+        width: 2,
+        color: tournament.finished
+            ? Colors.grey
+            : const Color.fromARGB(255, 80, 100, 84),
+      ),
+      borderRadius: BorderRadius.circular(12),
+    );
+  }  
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),      
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 222, 255, 228),
-        border: Border.all(
-          width: 2,
-          color: const Color.fromARGB(255, 80, 100, 84),
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),      
+      decoration: getTournamentDecoration(tournament),      
       child: InkWell(
         onTap: () async {             
             
@@ -57,14 +65,14 @@ class TournamentItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              tournament.name,
+              tournament.getDate(),
               style: TextStyle(
                 fontSize: 24.0,
                 fontWeight: FontWeight.bold
               )
             ),
-            Text(tournament.getDate()),
             Text('Format:  ${tournament.format}'),
+            Text('Synced: ${tournament.synced.toString()}'),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [                                

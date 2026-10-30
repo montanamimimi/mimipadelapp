@@ -28,6 +28,10 @@ class TournamentRepository {
     await local.cleanTournamentRoundGames(id, round);
   }
 
+  Future<void> cleanTournamentGames(String id) async {
+    await local.cleanTournamentGames(id);
+  }  
+
   Future<Tournament?> getTournamentById(String id) async {
     return await local.getTournament(id);
   }  
@@ -49,14 +53,25 @@ class TournamentRepository {
     // api.insertTournamentGames(items, tid);
   }
 
+  Future<void> updateTournamentGames(List<TournamentGame> items) async {
+    await local.updateTournamentGames(items);
+    // api.insertTournamentGames(items, tid);
+  }  
+
   Future<void> deleteTournament(String id) async {
     await local.deleteTournament(id);
     // api.deleteTournament(id);    
   }
 
-  Future<void> addTournamentPlayer(String id, String tid, String name, String playerId) async {
+  // Sync local tournament to external database
+
+  Future<bool> syncTournament(Tournament tournament, List<TournamentGame> games, List<TournamentPlayer> players) async {
+    return await api.syncTournament(tournament, games, players);
+  }  
+
+  Future<void> addTournamentPlayer(String id, String tid, String name, String playerId) async {  
     await local.addTournamentPlayer(id, tid, name, playerId);
-    api.addTournamentPlayer(id, tid, name, playerId);
+    // api.addTournamentPlayer(id, tid, name, playerId);
   }
 
   Future<void> removeTournamentPlayer(String id, String tid) async {
@@ -92,4 +107,12 @@ class TournamentRepository {
   Future<void> deleteLocalData() async {
     await local.cleanAllData();
   }  
+
+  Future<List<Tournament>> fetchTournamentsFromApi() async {
+    return await api.loadTournaments();
+  }  
+
+  Future<void> saveTournaments(List<Tournament> tournaments) async {
+    await local.syncTournaments(tournaments);
+  }        
 }

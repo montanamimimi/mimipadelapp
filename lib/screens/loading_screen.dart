@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mimipadel/models/mimi_user.dart';
 import 'package:mimipadel/services/auth.dart';
-import 'package:http/http.dart' as http;
+import 'package:mimipadel/services/connectivity_service.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key, required this.auth});  
@@ -15,31 +15,27 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
-  bool _isLoading = false;
+  bool _isLoading = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _connectivityService = ConnectivityService();
   bool _isSignUp = true;
   bool _hasInternet = false;
+  String error = "";
 
   Future<void> _checkInternet() async {
-    try {
-      await http
-          .get(Uri.parse('https://api.montanamimimi.me'))
-          .timeout(const Duration(seconds: 3));
+    setState(() => _isLoading = true);
 
-      if (!mounted) return;
+    final hasInternet = await _connectivityService.checkInternet();
 
-      setState(() {
-        _hasInternet = true;
-      });
-    } catch (_) {
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        _hasInternet = false;
-      });
-    }
-  } 
+    setState(() {
+      _hasInternet = hasInternet;
+      _isLoading = false;
+    });
+
+  }
 
   Future<void> signInWithEmail() async {
     setState(() {
@@ -63,7 +59,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
 
       if (user == null) {
-        print('Error - user is null');
         setState(() {
           _isLoading = false;
         });        
@@ -86,14 +81,22 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     try {
 
-      await widget.auth.signInAnon();
+      final result = await widget.auth.signInAnon();
 
-      if (!mounted) return;
-      
-      _goToHomeScreen();
+      if (result.success) {
+        _goToHomeScreen();
+      } else {
+        setState(() {
+          error = result.error!;
+        });
+      }      
 
+      // if (!mounted) return;
     } catch (e) {
-      debugPrint('Login error: $e');
+        setState(() {
+          error = e.toString();
+        });      
+    
     } finally {
       if (mounted) {
         setState(() {
@@ -142,7 +145,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   width: 100.0,
                   height: 100.0,
                 ),
-                // Text(_hasInternet.toString()),
+                Text(error),               
                 if (_hasInternet) ...[
                 _isLoading
                   ? SpinKitCircle(
@@ -171,23 +174,23 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   ),
 
                   const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: signInWithEmail,
-                        child: Text('Register'),
-                      ),
+                      // ElevatedButton(
+                      //   onPressed: signInWithEmail,
+                      //   child: Text('Register'),
+                      // ),
                       ElevatedButton(
                         onPressed: () async {
                           setState(() => _isSignUp = false);
                           await signInWithEmail();
                         },
-                        child: Text('Sing In (already registered)'),
+                        child: Text('Sing In'),
                       ),                    
-                      Text('Skip this step (you will lose all data if app uninstalled)'),
+                      // Text('Skip this step (you will lose all data if app uninstalled)'),
                       
-                      ElevatedButton(
-                        onPressed: signInAnonymously,
-                        child: Text('Skip Login'),
-                      )                       
+                      // ElevatedButton(
+                      //   onPressed: signInAnonymously,
+                      //   child: Text('Skip Login'),
+                      // )                       
                     ],
                   ),
                 ] else ...[
@@ -195,6 +198,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     height: 20.0
                   ),
                   Text('You are offline!'),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _checkInternet();
+                    }, 
+                    child: const Text('Reload'),
+                  ),
                   ElevatedButton(
                     onPressed: () {
                       _goToHomeScreen();

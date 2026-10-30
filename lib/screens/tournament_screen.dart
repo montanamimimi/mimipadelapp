@@ -127,6 +127,7 @@ class _TournamentScreenState extends State<TournamentScreen> {
       case TournamentScreenMode.settings:
         return SettingsTournamentView(
           controller: widget.controller,
+          playersController: widget.playersController,
         );      
     }
   }

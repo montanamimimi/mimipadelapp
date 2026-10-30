@@ -4,5 +4,5 @@ class AppConfig {
 
   // prod 
 
-  static const String apiUrl = 'https://api.montanamimimi.me/api';
+  static const String apiUrl = 'https://montanamimimi.me/api';
 }

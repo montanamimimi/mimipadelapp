@@ -56,7 +56,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   CircleAvatar(
                     backgroundImage: AssetImage('assets/images/person.jpg'),
                     radius: 50.0,
-                  ),         
+                  ),      
+                  if (user != null )   
+                  Text('User id ${user!.uid}'),  
                   // Text('User id ${user!.uid}'),  
                   // ElevatedButton(
                   //   onPressed: () async {

@@ -1,5 +1,5 @@
 import 'package:mimipadel/logic/round_generator.dart';
-import 'package:mimipadel/models/player.dart';
+// import 'package:mimipadel/models/player.dart';
 import 'package:mimipadel/models/tournament_format.dart';
 import 'package:mimipadel/models/tournament_player.dart';
 import 'package:mimipadel/repositories/tournament_repository.dart';
@@ -31,7 +31,6 @@ class TournamentController extends ChangeNotifier {
     }
     players = await repository.getTournamentPlayersById(tournament!.id);   
     games = await repository.getTournamentGamesById(tournament!.id);
-
 
     if (games.isEmpty) {      
       checkReady();
@@ -99,15 +98,23 @@ class TournamentController extends ChangeNotifier {
     await repository.deleteTournament(tournament!.id);
   }
 
-  Future<void> addTournamentPlayer(String name, String playerId) async {
+  Future<void> sync() async {
+    
+    final synced = await repository.syncTournament(tournament!, games, players);    
 
-    // !!! 
+    if (synced) {
+      tournament!.synced = true;
+      await repository.updateTournament(tournament!);      
+    }
+  }
 
+  Future<String> addTournamentPlayer(String name, String playerId) async {    
     final id = Ulid().toString();
     await repository.addTournamentPlayer(id, tournament!.id, name, playerId);
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
     notifyListeners();
+    return id;
   }
 
   Future<void> removeTournamentPlayer(String id) async {
@@ -115,6 +122,34 @@ class TournamentController extends ChangeNotifier {
     players = await repository.getTournamentPlayersById(tournament!.id);
     checkReady();
     notifyListeners();
+  }
+
+  Future<void> changeTournamentPlayer(String oldId, String newId, String name) async {
+
+    await removeTournamentPlayer(oldId);
+    final id = await addTournamentPlayer(name, newId);
+
+    for (var i = 0; i < games.length; i++) {
+      if (games[i].side1Player1Id == oldId) {
+        games[i].side1Player1Id = id;
+      }
+
+      if (games[i].side1Player2Id == oldId) {
+        games[i].side1Player2Id = id;
+      }
+
+      if (games[i].side2Player1Id == oldId) {
+        games[i].side2Player1Id = id;
+      }
+
+      if (games[i].side2Player2Id == oldId) {
+        games[i].side2Player2Id = id;
+      }                  
+    }
+
+    players = await repository.getTournamentPlayersById(tournament!.id);   
+    await repository.updateTournamentGames(games);
+    calculateStandings();
   }
 
   Future<void> startTournament() async {

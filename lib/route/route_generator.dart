@@ -6,6 +6,7 @@ import 'package:mimipadel/screens/home_screen.dart';
 import 'package:mimipadel/screens/loading_screen.dart';
 import 'package:mimipadel/screens/profile_screen.dart';
 import 'package:mimipadel/screens/players_screen.dart';
+import 'package:mimipadel/screens/sync_screen.dart';
 import 'package:mimipadel/screens/tournament_screen.dart';
 import 'package:mimipadel/repositories/tournament_repository.dart';
 import 'package:mimipadel/repositories/players_repository.dart';
@@ -34,6 +35,11 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => PlayersScreen(
           controller: PlayersController(repository: playersRepository),
         ));
+      case '/sync':
+        return MaterialPageRoute(builder: (_) => SyncScreen(
+          playersController: PlayersController(repository: playersRepository),
+          tournamentsController: HomeController(repository: repository),
+        ));        
       case '/tournament':
         final args = settings.arguments as Map<String, dynamic>;
         final id = args['id'];

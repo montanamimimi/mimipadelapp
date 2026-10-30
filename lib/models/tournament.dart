@@ -50,6 +50,8 @@ class Tournament {
     bool? finished,
     bool? mixer,
     bool? synced,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Tournament(
       id: id ?? this.id,      
@@ -62,7 +64,26 @@ class Tournament {
       finished: finished ?? this.finished,
       mixer: mixer ?? this.mixer,
       synced: synced ?? this.synced,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   } 
+
+
+  factory Tournament.fromJson(Map<String, dynamic> json) {
+    return Tournament(
+      id: json['id'],      
+      name: json['name'],      
+      date: DateTime.parse(json['date']),
+      format: json['format'],
+      courts: json['courts'],
+      points: json['points'],
+      started: json['started'] == 0 ? false : true,
+      finished: json['finished'] == 0 ? false : true,
+      mixer: json['mixer'] == 0 ? false : true,
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+    );
+  }  
 
 }

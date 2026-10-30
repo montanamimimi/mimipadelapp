@@ -27,6 +27,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
     await widget.controller.cleanLocalPlayers();
   }
 
+  Future<void> _syncPlayers() async {
+    await widget.controller.syncPlayers();
+    _load();
+  }    
+
   @override
   void initState() {
     super.initState();   
@@ -58,10 +63,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       onPressed: _cleanPlayers,
                       child: Text('Clean Local Players'),
                     ),
+                    ElevatedButton(
+                      onPressed: _syncPlayers,
+                      child: Text('Sync players'),
+                    ),                    
                     ...widget.controller.players.map(
                       (player) => PlayerItem(
                           name: player.name,
                           rating: 0,
+                          id: player.id,
                         ),
                     ),                                                                                                                                                                   
                   ],

@@ -2,11 +2,13 @@ class Player {
   final String id;
   String name;
   String? userId;
+  bool archived;
 
   Player({
     required this.id,
     required this.name,
-    this.userId, 
+    this.userId,
+    this.archived = false,
   });
 
   @override
@@ -14,13 +16,13 @@ class Player {
       return 'Player instance, id $id, name $name, user id $userId';
   }
 
-  // factory MimiUser.fromJson(Map<String, dynamic> json) {
-  //   return MimiUser(
-  //     id: json['id'],
-  //     firebaseUid: json['firebase_uid'],
-  //     name: json['name'],
-  //     email: json['email'],
-  //   );
-  // }
+  factory Player.fromJson(Map<String, dynamic> json) {
+    return Player(
+      id: json['id'],
+      userId: json['user_id'],
+      name: json['name'],
+      archived: json['archived'] == 1,
+    );
+  }
 
 }

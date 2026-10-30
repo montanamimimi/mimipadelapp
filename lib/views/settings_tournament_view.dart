@@ -1,16 +1,22 @@
+import 'package:mimipadel/controllers/players_controller.dart';
 import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:mimipadel/models/tournament_player.dart';
 import 'package:mimipadel/widget/dialogs/text_input_dialog.dart';
 import 'package:mimipadel/widget/dialogs/confirm_dialog.dart';
 import 'package:mimipadel/widget/dialogs/check_option_dialog.dart';
+import 'package:mimipadel/widget/form_fields/player_autocomplete.dart';
+import 'package:mimipadel/models/player.dart';
 
 class SettingsTournamentView extends StatefulWidget {
 
   final TournamentController controller;
+  final PlayersController playersController;
 
   const SettingsTournamentView({
     super.key,
     required this.controller,
+    required this.playersController,
   });
 
   @override
@@ -24,6 +30,36 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
     if (!mounted) return;
     Navigator.pop(context, true);
   }
+
+  Future<void> _syncTournament() async {
+    await widget.controller.sync();
+    setState(() {});
+  }  
+
+  Future<void> _changeTournamentPlayer(TournamentPlayer player, Player? newPlayer, String name) async {
+
+    if (name.isEmpty) return;
+
+    final playerId = newPlayer?.id ??
+        await widget.playersController.addPlayer(name);
+
+    await widget.controller.changeTournamentPlayer(player.id, playerId, name);    
+    
+  }   
+
+  Future<void> _load() async {
+    await widget.playersController.getPlayers();
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }  
+
+  @override
+  void initState() {
+    super.initState();   
+    _load();
+  }  
 
   @override 
   Widget build(BuildContext context) {
@@ -60,6 +96,9 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                   )
                 ],
               ),
+              Row(children: [
+                Text(widget.controller.tournament!.id),
+              ],),
               Row(
                 children: [
                   Text("Format: ${widget.controller.tournament!.format}"),
@@ -135,19 +174,37 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                         final player = entry.value;
                 
                         return Row(
-                          children: [     
+                          children: [                         
                             IconButton(
-                              onPressed: () async {
-                               
-                                final name = await showTextInputDialog(
-                                context: context,
-                                title: 'Rename player',
-                                initialValue: entry.value.name,                           
-                                );
+                              onPressed: () async {                                
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Change player'),
+                                      actions: const [],
+                                      content: SizedBox(
+                                        width: 400,
+                                        child: PlayerAutocomplete(
+                                          playersController: widget.playersController,
+                                          tournamentPlayers: widget.controller.players,
+                                          onSubmit: (newPlayer, name) async {
+                                           
+                                            await _changeTournamentPlayer(player, newPlayer, name);
 
-                                if (name != null && name.isNotEmpty) {
-                                  widget.controller.updateTournamentPlayerName(entry.value.id, name);                       
-                                }   
+                                            FocusManager.instance.primaryFocus?.unfocus();
+
+                                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                                              if (context.mounted) {
+                                                Navigator.of(context).pop();
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );                               
                               }, 
                               icon: Icon(
                                 Icons.edit,
@@ -158,17 +215,11 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                             SizedBox(
                               width: 10.0,
                             ),
-                            Text(player.name),
+                            Text(player.name),                            
                           ],
                         );
                       },
                     ),
-                    // ElevatedButton(
-                    //   onPressed: () { 
-                    //     print(widget.controller.tournament);                
-                    //   }, 
-                    //   child: Text("Debug Print tournament data")
-                    // ),
                     if(
                       (widget.controller.round) > 0 
                       && 
@@ -209,7 +260,21 @@ class _SettingsTournamentViewState extends State<SettingsTournamentView> {
                       },
                       child: Text("Randomize Current Round")
                     ),
-                  
+
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _syncTournament();
+                      },
+                      child: Row (
+                        children: [
+                          Text("Sync tournament"),
+                          Icon(
+                            Icons.sync,
+                          )
+                        ],
+                      )
+                    ),
+
                     ElevatedButton(
                       onPressed: () async {
                         final result = await showConfirmDialog(

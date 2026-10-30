@@ -2,7 +2,9 @@ import 'package:mimipadel/controllers/players_controller.dart';
 import 'package:mimipadel/controllers/tournament_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:mimipadel/models/player.dart';
-import 'package:mimipadel/widget/form_fields/player_name_form_field.dart';
+// import 'package:mimipadel/widget/form_fields/player_name_form_field.dart';
+
+import 'package:mimipadel/widget/form_fields/player_autocomplete.dart';
 
 class EditTournamentView extends StatefulWidget {
 
@@ -22,42 +24,42 @@ class EditTournamentView extends StatefulWidget {
 }
 
 class _EditTournamentViewState extends State<EditTournamentView> {
-  
-  // final _formKey = GlobalKey<FormState>();
-  // final _playerFocusNode = FocusNode();
-  // final TextEditingController _playerController = TextEditingController();
-  TextEditingController? _playerTextController;
+  // TextEditingController? _playerTextController;
   late PlayersController playersController;
 
   @override
   void dispose() {
-    // _playerFocusNode.dispose();
     playersController.dispose();
     super.dispose();
   }
 
-  Future<void> _addTournamentPlayer(Player? player) async {    
+  Future<void> _addTournamentPlayer(Player? player, String name) async {
+    if (name.isEmpty) return;
 
-    String playerId;
+    final playerId = player?.id ??
+        await widget.playersController.addPlayer(name);
 
-    if (_playerTextController == null || _playerTextController!.text.isEmpty) {
-      print('Empty!');
-      return;
-    }
+    await widget.controller.addTournamentPlayer(name, playerId);
+  }  
 
-    if (player == null) {
-      playerId = await widget.playersController.addPlayer(_playerTextController!.text);      
-    } else {
-      playerId = player.id;
-    }
+  // Future<void> _addTournamentPlayer(Player? player) async {    
 
-    // if (!_formKey.currentState!.validate()) return;
-    await widget.controller.addTournamentPlayer(_playerTextController!.text, playerId);
-    // _playerController.clear();
-    // _playerFocusNode.requestFocus();
+  //   String playerId;   
 
-    _playerTextController?.clear();
-  }
+  //   if (_playerTextController == null || _playerTextController!.text.isEmpty) {      
+  //     return;
+  //   }
+
+  //   if (player == null) {
+  //     playerId = await widget.playersController.addPlayer(_playerTextController!.text);      
+  //   } else {
+  //     playerId = player.id;
+  //   }
+
+  //   await widget.controller.addTournamentPlayer(_playerTextController!.text, playerId);
+
+  //   _playerTextController?.clear();
+  // }
 
   Future<void> _removeTournamentPlayer(String id) async {
     await widget.controller.removeTournamentPlayer(id);
@@ -117,70 +119,63 @@ class _EditTournamentViewState extends State<EditTournamentView> {
               height: 20.0
             ),      
             if (!widget.controller.gameReady)      
-            Form(
-              // key: _formKey,
-              child: Row(
-                children: [
-                  // Expanded(child: PlayerNameFormField(
-                  //   controller: _playerController, 
-                  //   label: 'Name',
-                  //   required: true,
-                  //   callback: _addTournamentPlayer,
-                  //   focusNode: _playerFocusNode,
-                  // )),
-                  // IconButton(
-                  //   onPressed: _addTournamentPlayer,
-                  //   icon: Icon(Icons.add)
-                  // )
-                  Expanded(
-                    child: Autocomplete<Player>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
-                          return const Iterable<Player>.empty();
-                        }
+            PlayerAutocomplete(
+              playersController: widget.playersController,
+              tournamentPlayers: widget.controller.players,
+              onSubmit: (player, name) async {
+                await _addTournamentPlayer(player, name);
+              },
+            ),
+            // Form(
+            //   child: Row(
+            //     children: [
+            //       Expanded(
+            //         child: Autocomplete<Player>(
+            //           optionsBuilder: (TextEditingValue textEditingValue) {
+            //             if (textEditingValue.text.isEmpty) {
+            //               return const Iterable<Player>.empty();
+            //             }
 
-                        return widget.playersController.players.where((player) {
-                          return player.name.toLowerCase().contains(
-                            textEditingValue.text.toLowerCase(),
-                          );  
-                        });
-                      },
+            //             return widget.playersController.players.where((player) {
+            //               return player.name.toLowerCase().contains(
+            //                 textEditingValue.text.toLowerCase(),
+            //               );  
+            //             });
+            //           },
 
-                      displayStringForOption: (player) => player.name,
+            //           displayStringForOption: (player) => player.name,
 
-                      onSelected: (Player player) async {
-                        // print('Selected: $player');
-                        // print(_playerTextController);
-                        await _addTournamentPlayer(player);                                        
-                      },
+            //           onSelected: (Player player) async {
+            //             await _addTournamentPlayer(player);                                        
+            //           },
 
-                      fieldViewBuilder: (
-                        BuildContext context,
-                        TextEditingController textController,
-                        FocusNode focusNode,
-                        VoidCallback onFieldSubmitted,
-                      ) {
-                        _playerTextController = textController;
-                        return TextFormField(
-                          controller: textController,
-                          focusNode: focusNode,
-                          decoration: const InputDecoration(
-                            labelText: 'Player name',
-                            hintText: 'Start typing...',
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      _addTournamentPlayer(null);
-                    },
-                    icon: Icon(Icons.add)
-                  )                  
-                ]
-              ),
-            ),  
+            //           fieldViewBuilder: (
+            //             BuildContext context,
+            //             TextEditingController textController,
+            //             FocusNode focusNode,
+            //             VoidCallback onFieldSubmitted,
+            //           ) {
+            //             _playerTextController = textController;
+            //             return TextFormField(
+            //               controller: textController,
+            //               focusNode: focusNode,
+            //               decoration: const InputDecoration(
+            //                 labelText: 'Player name',
+            //                 hintText: 'Start typing...',
+            //               ),
+            //             );
+            //           },
+            //         ),
+            //       ),
+            //       IconButton(
+            //         onPressed: () {
+            //           _addTournamentPlayer(null);
+            //         },
+            //         icon: Icon(Icons.add)
+            //       )                  
+            //     ]
+            //   ),
+            // ),  
             if (widget.controller.gameReady) 
               ElevatedButton(
                 onPressed: () async {

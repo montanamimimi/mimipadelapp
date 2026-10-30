@@ -1640,9 +1640,9 @@ class $PlayerTableTable extends PlayerTable
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
     'user_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -1657,8 +1657,22 @@ class $PlayerTableTable extends PlayerTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _archivedMeta = const VerificationMeta(
+    'archived',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, userId, name];
+  late final GeneratedColumn<bool> archived = GeneratedColumn<bool>(
+    'archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("archived" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, userId, name, archived];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1681,8 +1695,6 @@ class $PlayerTableTable extends PlayerTable
         _userIdMeta,
         userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -1691,6 +1703,14 @@ class $PlayerTableTable extends PlayerTable
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('archived')) {
+      context.handle(
+        _archivedMeta,
+        archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_archivedMeta);
     }
     return context;
   }
@@ -1708,10 +1728,14 @@ class $PlayerTableTable extends PlayerTable
       userId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}user_id'],
-      )!,
+      ),
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
+      )!,
+      archived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}archived'],
       )!,
     );
   }
@@ -1724,27 +1748,35 @@ class $PlayerTableTable extends PlayerTable
 
 class PlayerTableData extends DataClass implements Insertable<PlayerTableData> {
   final String id;
-  final String userId;
+  final String? userId;
   final String name;
+  final bool archived;
   const PlayerTableData({
     required this.id,
-    required this.userId,
+    this.userId,
     required this.name,
+    required this.archived,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     map['name'] = Variable<String>(name);
+    map['archived'] = Variable<bool>(archived);
     return map;
   }
 
   PlayerTableCompanion toCompanion(bool nullToAbsent) {
     return PlayerTableCompanion(
       id: Value(id),
-      userId: Value(userId),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       name: Value(name),
+      archived: Value(archived),
     );
   }
 
@@ -1755,8 +1787,9 @@ class PlayerTableData extends DataClass implements Insertable<PlayerTableData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PlayerTableData(
       id: serializer.fromJson<String>(json['id']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       name: serializer.fromJson<String>(json['name']),
+      archived: serializer.fromJson<bool>(json['archived']),
     );
   }
   @override
@@ -1764,22 +1797,29 @@ class PlayerTableData extends DataClass implements Insertable<PlayerTableData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'name': serializer.toJson<String>(name),
+      'archived': serializer.toJson<bool>(archived),
     };
   }
 
-  PlayerTableData copyWith({String? id, String? userId, String? name}) =>
-      PlayerTableData(
-        id: id ?? this.id,
-        userId: userId ?? this.userId,
-        name: name ?? this.name,
-      );
+  PlayerTableData copyWith({
+    String? id,
+    Value<String?> userId = const Value.absent(),
+    String? name,
+    bool? archived,
+  }) => PlayerTableData(
+    id: id ?? this.id,
+    userId: userId.present ? userId.value : this.userId,
+    name: name ?? this.name,
+    archived: archived ?? this.archived,
+  );
   PlayerTableData copyWithCompanion(PlayerTableCompanion data) {
     return PlayerTableData(
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
       name: data.name.present ? data.name.value : this.name,
+      archived: data.archived.present ? data.archived.value : this.archived,
     );
   }
 
@@ -1788,65 +1828,74 @@ class PlayerTableData extends DataClass implements Insertable<PlayerTableData> {
     return (StringBuffer('PlayerTableData(')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('archived: $archived')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, name);
+  int get hashCode => Object.hash(id, userId, name, archived);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PlayerTableData &&
           other.id == this.id &&
           other.userId == this.userId &&
-          other.name == this.name);
+          other.name == this.name &&
+          other.archived == this.archived);
 }
 
 class PlayerTableCompanion extends UpdateCompanion<PlayerTableData> {
   final Value<String> id;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String> name;
+  final Value<bool> archived;
   final Value<int> rowid;
   const PlayerTableCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.name = const Value.absent(),
+    this.archived = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PlayerTableCompanion.insert({
     required String id,
-    required String userId,
+    this.userId = const Value.absent(),
     required String name,
+    required bool archived,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       userId = Value(userId),
-       name = Value(name);
+       name = Value(name),
+       archived = Value(archived);
   static Insertable<PlayerTableData> custom({
     Expression<String>? id,
     Expression<String>? userId,
     Expression<String>? name,
+    Expression<bool>? archived,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (name != null) 'name': name,
+      if (archived != null) 'archived': archived,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   PlayerTableCompanion copyWith({
     Value<String>? id,
-    Value<String>? userId,
+    Value<String?>? userId,
     Value<String>? name,
+    Value<bool>? archived,
     Value<int>? rowid,
   }) {
     return PlayerTableCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
+      archived: archived ?? this.archived,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1863,6 +1912,9 @@ class PlayerTableCompanion extends UpdateCompanion<PlayerTableData> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (archived.present) {
+      map['archived'] = Variable<bool>(archived.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1875,6 +1927,7 @@ class PlayerTableCompanion extends UpdateCompanion<PlayerTableData> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('name: $name, ')
+          ..write('archived: $archived, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2758,15 +2811,17 @@ typedef $$TournamentGameTableTableProcessedTableManager =
 typedef $$PlayerTableTableCreateCompanionBuilder =
     PlayerTableCompanion Function({
       required String id,
-      required String userId,
+      Value<String?> userId,
       required String name,
+      required bool archived,
       Value<int> rowid,
     });
 typedef $$PlayerTableTableUpdateCompanionBuilder =
     PlayerTableCompanion Function({
       Value<String> id,
-      Value<String> userId,
+      Value<String?> userId,
       Value<String> name,
+      Value<bool> archived,
       Value<int> rowid,
     });
 
@@ -2791,6 +2846,11 @@ class $$PlayerTableTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get archived => $composableBuilder(
+    column: $table.archived,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2818,6 +2878,11 @@ class $$PlayerTableTableOrderingComposer
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get archived => $composableBuilder(
+    column: $table.archived,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PlayerTableTableAnnotationComposer
@@ -2837,6 +2902,9 @@ class $$PlayerTableTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get archived =>
+      $composableBuilder(column: $table.archived, builder: (column) => column);
 }
 
 class $$PlayerTableTableTableManager
@@ -2871,25 +2939,29 @@ class $$PlayerTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> userId = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<bool> archived = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlayerTableCompanion(
                 id: id,
                 userId: userId,
                 name: name,
+                archived: archived,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String id,
-                required String userId,
+                Value<String?> userId = const Value.absent(),
                 required String name,
+                required bool archived,
                 Value<int> rowid = const Value.absent(),
               }) => PlayerTableCompanion.insert(
                 id: id,
                 userId: userId,
                 name: name,
+                archived: archived,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -44,6 +44,18 @@ class AppDatabase extends _$AppDatabase {
   Future<bool> updateTournament(TournamentTableCompanion entity) async {
     return await update(tournamentTable).replace(entity);
   }
+  
+  Future<void> updateTournamentGames(List<TournamentGameTableCompanion> games) async {
+    await batch((batch) {
+      for (final game in games) {
+        batch.update(
+          tournamentGameTable,
+          game,
+          where: (tbl) => tbl.id.equals(game.id.value),
+        );
+      }
+    });
+  }  
 
   Future<int> insertTournament(TournamentTableCompanion entity) async {
     return await into(tournamentTable).insert(entity);
@@ -61,7 +73,13 @@ class AppDatabase extends _$AppDatabase {
           .go();
   }
 
-  Future<int> addTournamentPlayer(TournamentPlayerTableCompanion player) async {
+  Future<void> deleteGamesByTournamentId(String id) async {
+
+    await (delete(tournamentGameTable)..where((tbl) => tbl.id.equals(id))).go();
+
+  }  
+
+  Future<int> addTournamentPlayer(TournamentPlayerTableCompanion player) async {   
     return await into(tournamentPlayerTable).insert(player);
   }
 
@@ -104,6 +122,22 @@ class AppDatabase extends _$AppDatabase {
     ..where((tbl) => tbl.tournamentId.equals(id) & tbl.round.equals(round)))
     .get();
   }
+
+  Future<PlayerTableData> getPlayerById(String id) async {
+    return await (select(playerTable)..where((tbl) => tbl.id.equals(id))).getSingle();
+  }
+
+  Future<void> syncPlayers(List<PlayerTableCompanion> players) async {
+    for (final player in players) {
+      await into(playerTable).insertOnConflictUpdate(player);
+    }
+  }
+
+  Future<void> syncTournaments(List<TournamentTableCompanion> tournaments) async {
+    for (final tournament in tournaments) {
+      await into(tournamentTable).insertOnConflictUpdate(tournament);
+    }
+  }  
 
   Future<void> updateGameScore(String id, TournamentGameTableCompanion entity) async {
     await (update(tournamentGameTable)

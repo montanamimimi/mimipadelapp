@@ -1,12 +1,10 @@
 import 'package:mimipadel/enums/tournament_screen_mode.dart';
-// import 'package:mimipadel/models/tournament.dart';
 import 'package:flutter/material.dart';
 import 'package:mimipadel/models/tournament_format.dart';
 import 'package:mimipadel/services/auth.dart';
 import 'package:mimipadel/widget/tournament_list.dart';
 import 'package:mimipadel/controllers/home_controller.dart';
 import 'package:mimipadel/widget/dialogs/check_option_dialog.dart';
-import 'package:mimipadel/widget/dialogs/confirm_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   
@@ -162,14 +160,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon (
-                  Icons.person
+                  Icons.sports_tennis
                 ),
                 title: Text("Players"),
                 onTap: () {                 
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/players');
                 }
-              )              
+              ),
+              // ListTile(
+              //   leading: Icon (
+              //     Icons.sync
+              //   ),
+              //   title: Text("Sync data"),
+              //   onTap: () {                 
+              //     Navigator.pop(context);
+              //     Navigator.pushNamed(context, '/sync');
+              //   }
+              // )              
             ],
           )
         )

@@ -3,6 +3,7 @@ import 'package:mimipadel/models/mimi_user.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:mimipadel/config/app_config.dart';
+import 'package:mimipadel/models/sign_in_result.dart';
 
 class AuthService {
 
@@ -10,17 +11,23 @@ class AuthService {
 
   // sign in anon 
 
-  Future<MimiUser?> signInAnon() async {
+  Future<SignInResult> signInAnon() async {
     try {
       await _auth.signInAnonymously();
       
       final MimiUser? user = await syncUser();
 
-      return user;
+      if (user == null) {
+        signOut();
+        return SignInResult(error: 'Failed to sync user.');
+      }
+
+      return SignInResult(user: user);
 
     } on FirebaseAuthException catch(e) {
-      print(e.code);
-      return null;
+      return SignInResult(error: e.message ?? e.code);
+    } catch (e) {
+      return SignInResult(error: e.toString());
     }
   }
 
